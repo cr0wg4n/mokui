@@ -9,10 +9,16 @@ stack g=lg p=lg
   grid cols=1 cols-md=3 g=md
     card "Visits"
       text xl bold "1,204"
-  button primary "Save"
+  button primary opens=#confirm "Save"
+  modal #confirm sm "Save changes?"
+    row g=sm justify=end
+      button ghost closes "Cancel"
+      button primary closes "Confirm"
 ```
 
-- **Cheap:** about 66% fewer tokens than the equivalent Tailwind HTML in our fixtures ([bench](./bench/README.md)).
+- **Cheap:** about 70% fewer tokens than the equivalent Tailwind HTML in our fixtures ([bench](./bench/README.md)).
+- **Modern by default:** soft neutrals, rounded corners, subtle elevation; `theme=dark` and `theme=wire` for other looks.
+- **Interactive drafts:** `button opens=#invite`, modals, drawers, sidebars, dropdowns, tabs. Declared, not programmed, and validated.
 - **Closed vocabulary:** unknown tags, attributes and values are errors with line numbers.
 - **For agents:** generated cheat sheet, structural outline with notes, PNG render. See [docs/AGENTS.md](./docs/AGENTS.md).
 - **One dependency, zero runtime deps.**

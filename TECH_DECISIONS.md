@@ -7,10 +7,11 @@ Record of what we chose and why. Subordinate to [CONSTITUTION.md](./CONSTITUTION
 | Area | Decision |
 |---|---|
 | Rendering | **Web Components** (Custom Elements v1 + Shadow DOM), hand-written, no library |
-| Styling | Plain CSS, constructable stylesheets, CSS custom-property scales, attribute selectors |
+| Styling | Plain CSS, constructable stylesheets, CSS custom-property scales and design tokens, attribute selectors; three themes (`modern`, `dark`, `wire`) |
 | CSS framework | None |
 | Icons | Bundled SVG path map, Lucide names |
 | Authoring | Indentation-based DSL (primary), HTML tags (secondary); recipes for composites |
+| Interactions | Declared (`opens` / `toggles` / `closes`), one delegated click listener, state is open / closed / selected only |
 | Integration | Vite plugin or plain import; Node-safe `mokui/core`; CLI |
 | Language / tests | Strict TypeScript, Vitest + token benchmarks |
 | Package manager | `nub` |
@@ -56,7 +57,7 @@ Record of what we chose and why. Subordinate to [CONSTITUTION.md](./CONSTITUTION
 - A small hand-written parser (no parser-generator dependency) produces the same custom-element tree, so DSL and HTML are equivalent and share one render path.
 - Syntax: `tag [bare words] [key=value] ["text"] [#name]`. `//` starts a comment line (`#` is reserved for names). Quoted attribute values (`label="Full name"`) and boolean flags (`disabled`) are supported.
 - **Secondary:** raw HTML tags (`<mk-row g="md">`) work with no parser at all.
-- Benchmark (7 fixtures, proxy tokenizer): 53% fewer tokens than compact mk HTML, 63% than pretty, 66% than Tailwind HTML. The cheat sheet costs 958 tokens and pays back after about 4 mocks. See [bench/README.md](./bench/README.md). Still provisional until LLM generation accuracy is measured ([eval/README.md](./eval/README.md)).
+- Benchmark (8 fixtures, proxy tokenizer): 53% fewer tokens than compact mk HTML, 63% than pretty, 70% than Tailwind HTML. The cheat sheet costs 1320 tokens and pays back after about 4 mocks. See [bench/README.md](./bench/README.md). Still provisional until LLM generation accuracy is measured ([eval/README.md](./eval/README.md)).
 
 ### Vite integration
 - Entry point registers all elements as a side effect, with a sub-path export per primitive for tree-shaking.
@@ -101,7 +102,25 @@ Unknown tags, attributes and values are errors, all reported at once with line n
 - `frame mobile|tablet|desktop` previews a device width.
 
 ### Recipes (`src/recipes.ts`)
-`card`, `navbar`, `tabs`, `list`, `table`, `tr` are DSL-level macros that expand to primitives before rendering. There are no recipe elements, no extra rendering path, and the DOM stays flat and readable. See constitution section 2.7.
+`card`, `navbar`, `list`, `table`, `tr` are DSL-level macros that expand to primitives before rendering. There are no recipe elements, no extra rendering path, and the DOM stays flat and readable. See constitution section 2.7.
+
+### Look: tokens and themes
+- Every color, radius and shadow is a design token read through a CSS variable with the modern value as its fallback (`var(--mk-fg,#18181b)`). A `theme` attribute (`modern`, `dark`, `wire`) on any element redefines the variables for its subtree; because custom properties inherit through shadow DOM, a dark panel can sit inside a light page. `mount(..., { theme })` does the same for a whole mock.
+- The default is modern and restrained: zinc neutrals, 12px / 8px radii, soft shadows, one accent that defaults to near-black so a draft is not mistaken for a brand design (constitution 3.5). `wire` keeps the old plain look for low-fidelity conversations.
+- Theme rules live in the shared base sheet, so adding a theme is one entry in `src/scale.ts`.
+
+### Interactions
+- **Declared, not programmed (constitution 2.8).** `opens=#name`, `toggles=#name`, `closes` / `closes=#name` on any element; stateful targets are `modal`, `drawer`, `sidebar`, `dropdown`, `toast`, `collapse`. Their state is the `open` attribute (`sidebar` is visible unless `closed`). `tabs`, `collapse` and `dropdown` carry their own selection state.
+- **One delegated listener** on `document` (`src/elements/interact.ts`), installed when elements are defined. It reads `composedPath()`, so it works for markup inside Vue, React and other shadow roots, and resolves `#name` within the clicked element's own tree. The innermost element with an interaction attribute wins. Also: Escape closes the top modal or drawer, a click outside closes dropdowns, a backdrop click closes a modal.
+- **Validated at parse time:** missing target (lists existing names), duplicate names, a target that cannot open, `closes` outside an overlay, `menu` outside `dropdown`, `tab` outside `tabs`.
+- **Overlays cover the nearest positioned container** (`position: absolute; inset: 0`), not the viewport, so they work in panes and inside a `frame` device preview. `mount()` positions its target and gives it a minimum height when the mock has a modal or drawer.
+- **States can be drawn statically:** the `open` flag, `compile(src, { open })`, `mount(..., { open })`, `mokui render --open name`. `outline()` lists the interactions and which states exist, so an agent can render each one.
+- **No timers, no navigation, no data.** A toast stays until closed; a reload resets everything.
+
+### Browser built-ins that bite custom elements
+Found by testing in a real browser, now covered by regression tests:
+- The HTML `align` attribute is a legacy hint for `text-align`: `row align=center` silently centered the text of every child (a placeholder drifted away from its icon). Every element now resets `text-align: start` on `:host`; only the `center` flag on `text` centers.
+- The `title` attribute shows a native tooltip, so the quoted text of `modal`, `drawer` and `collapse` is stored in `label`, never `title`.
 
 ### Intent layer
 Every tag accepts `name` (`#name`), `role` and `note`. Controls get a default `role` attribute on the host (explicit `role` wins). `outline()` prints the canonical tree, an inventory of interactive elements and the notes, so an agent can match a mock against written requirements.

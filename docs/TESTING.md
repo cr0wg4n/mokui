@@ -22,29 +22,34 @@ nub exec playwright install chromium
 ```
 The Chromium build must match the installed Playwright version. If tests fail with `Executable doesn't exist`, rerun the install command.
 
-## Coverage (106 tests)
+## Coverage (162 tests)
 
-**Unit (29)**
-- `dsl` (17): nesting, attrs, bare words per tag, quoted attribute values, flags, `#name`, intent attrs; prototype names rejected; all errors reported at once with line numbers and valid options; breakpoint variants only on responsive attrs; indent errors; print round-trip; every recipe's expansion; recipes expand to primitives only.
-- `agent-views` (5): outline tree, interactive inventory, notes, recipe expansion on request; cheat sheet covers every tag, mentions intent and responsive syntax, stays compact.
-- `eval-score` (6): scoring of valid, incomplete and invalid mocks, fence extraction, prompt set sanity.
+**Unit (44)**
+- `dsl` (16): nesting, attrs, bare words per tag, quoted attribute values, flags, `#name`, intent attrs; prototype names rejected; all errors reported at once with line numbers and valid options; breakpoint variants only on responsive attrs; indent errors; print round-trip with bare words; every recipe's expansion; recipes expand to primitives only.
+- `interactions` (15): `opens` / `toggles` / `closes` parsing and print round-trip; missing target (lists the names that exist), duplicate names, target that cannot open, `closes` outside an overlay, `menu` outside `dropdown`, `tab` outside `tabs`; `compile` with `open` states (including sidebar, unknown names, recipes); outline flows and states; cheat sheet content.
+- `agent-views` (5): outline tree, interactive inventory, notes, recipe expansion on request; cheat sheet covers every tag and stays compact.
+- `eval-score` (7): scoring of valid, incomplete and invalid mocks (including interaction prompts), fence extraction, prompt set sanity.
 - `elements` (1): `mount` creates registered elements.
 
-**Browser (66)**
+**Browser (101)**, in real Chromium
 - `styles` (20): flex direction, every spacing token, padding, align/justify, text sizes, theming through CSS variables, icons, host-CSS isolation, composition geometry.
-- `layout` (15): grid columns, `min=` auto-reflow at different widths, breakpoint variants (`cols-md`, `g-md`, `dir-md`) below and above the breakpoint, frame widths and frame as a query container, box, spacer, divider (horizontal and vertical), scroll, `w=full`.
-- `controls` (21): button variants, sizes, icon, disabled, full, role; input label, placeholder, value, type icons; textarea rows; select options, value, open; checkbox, radio, switch states; slider position and clamping; unknown-icon warning; every bundled icon renders; fields fit narrow cards.
-- `content` (10): image ratio and label, avatar, badge, text modifiers, and the rendering of `card`, `navbar`, `table`, `tabs`.
+- `layout` (15): grid columns, `min=` auto-reflow, breakpoint variants below and above the breakpoint, frame widths and frame as a query container, box, spacer, divider, scroll, `w=full`.
+- `controls` (21): button variants, sizes, icon, disabled, full, role; input label, placeholder, value, type icons; textarea rows; select; checkbox, radio, switch; slider; unknown-icon warning; every bundled icon renders; fields fit narrow cards.
+- `content` (9): image, avatar, badge, text modifiers, and `card`, `navbar`, `table` rendering.
+- `interactions` (21): modal hidden until opened, covers its container, closes from `closes`, the x, the backdrop and Escape (and not from a click on the panel), sizes; drawer sides; sidebar default, toggle, `closed`, `grow`; dropdown trigger, item click, outside click, second dropdown, Escape; tabs switching, `active=N`, strip-only; collapse; tooltip on real hover; toast; interactions inside a shadow root.
+- `look` (15): modern tokens (radius, shadow, accent, field height), `raised`, themes `dark` and `wire` (subtree, nesting, `mount({ theme })`, invalid value), `mount({ open })`, and regression tests for browser built-in attribute behavior (legacy `align` hint, native `title` tooltips).
 
-**E2E (11)**
-- CLI (5): `cheatsheet`, `outline` from stdin, a real PNG (signature and size), PNG height changes with width (responsive), errors with line numbers and a non-zero exit.
-- Consumers (6): Vue and React apps built with the Vite plugin render custom elements with shadow roots, with no console errors; a `.mk` import renders three columns at 1000px and one at 500px. Tree-shaking: `mokui/core` contains no `customElements` and no icon paths, and is smaller than the full import.
+**E2E (17)**
+- CLI (9): `cheatsheet`; `outline` from stdin; a real PNG; PNG height changes with width; `--open` draws a closed modal; `--open` with an unknown name fails clearly; `--theme` changes the picture; outline shows interactions and states; errors with line numbers and a non-zero exit.
+- Consumers (8): Vue and React apps built with the Vite plugin render custom elements with shadow roots and no console errors; a click on a trigger declared in the `.mk` file opens and closes the modal; a `.mk` import renders three columns at 1000px and one at 500px. Tree-shaking: `mokui/core` ships no `customElements` and no icon paths, and is smaller than the full import.
 
 ## Not covered yet
 - Firefox and WebKit. Only Chromium runs today.
 - Visual regression (screenshots are generated but not diffed).
 - Angular and Svelte consumers (documented, not tested).
 - Console warnings for raw-HTML invalid attribute values (the DSL rejects them; raw HTML is silently ignored).
+- Keyboard and focus behavior: overlays do not trap focus or restore it, and tabs and dropdowns have no arrow-key support. These are mocks, but it is a gap if accessibility review matters.
+- Visual quality of states is checked by eye (rendered PNGs reviewed during development), not by diffing.
 - Accessibility auditing beyond roles on controls.
 - Agent accuracy with a real model: the harness exists (`eval/`) but has not been run. See [eval/README.md](../eval/README.md).
 - CI: no pipeline is configured, so none of this runs automatically yet.

@@ -48,6 +48,12 @@ A mock is a **communication artifact**: it sits next to written requirements and
 - Common patterns (card, navbar, tabs, table, list) are important and supported, but as **recipes**: named compositions that expand into the same primitives. They add no new rendering path and no bespoke styling.
 - A recipe is only added when it measurably saves tokens or reduces agent errors in real mocks.
 
+### 2.8 Interactions are declared, not programmed
+- Real UIs have modals, sidebars, menus and tabs, and a draft that cannot show them misses half the requirements. Mokui supports **declared interactions**: a trigger names what it opens, closes or toggles (`button opens=#confirm`), and some widgets carry built-in selection state (tabs, dropdown, collapse).
+- Interaction state is limited to **open / closed / selected**. There are no conditions, loops, data, timers, navigation or persistence. A reload resets everything.
+- Every reference is validated: an `opens=#x` with no element named `x` is an error with a line number.
+- Interactions are part of the intent layer: `outline()` lists the flows ("this button opens that modal") and which states exist, and any state can be rendered statically (`--open name`), so an agent can see each screen state.
+
 ## 3. Design Rules
 
 ### 3.1 Small closed vocabulary
@@ -67,8 +73,10 @@ A mock is a **communication artifact**: it sits next to written requirements and
 - Mokui can describe its own vocabulary in a compact, agent-consumable form (a "cheat sheet" an agent can load once for minimal tokens).
 - Documentation and the cheat sheet are generated from the same source of truth as the code, so they cannot drift.
 
-### 3.5 Visual neutrality
-- Default styling is neutral, wireframe-like, and legible. It must never be mistaken for a final design.
+### 3.5 Modern, restrained, never final
+- The default look is modern and polished: soft neutrals, rounded corners, subtle elevation, clear type. A draft that looks good gets read and discussed.
+- It stays restrained: a single accent that defaults to near-black, no brand colors, no imagery, placeholder content. It must never be mistaken for a final design.
+- Look is controlled only through CSS custom properties and one `theme` attribute (`modern`, `dark`, `wire`). `wire` is the plain wireframe look for when fidelity should be low.
 - Styles are isolated so mocks do not leak into, or get altered by, the host app's CSS.
 
 ## 4. Non-Goals
@@ -76,7 +84,7 @@ A mock is a **communication artifact**: it sits next to written requirements and
 Mokui will not:
 - Become a full component library or design system. Recipes (section 2.7) expand to primitives; they are not a component library.
 - Ship framework-specific component wrappers as a requirement.
-- Include a state manager, router, data layer, or business logic.
+- Include a state manager, router, data layer, or business logic. Declared interactions (section 2.8) are limited to open, closed and selected.
 - Require a build step beyond a standard Vite setup.
 - Optimize for production performance or accessibility auditing of final UIs (it may offer sensible defaults, but it is a drafting tool).
 - Add features whose main benefit is human convenience at the expense of token cost.

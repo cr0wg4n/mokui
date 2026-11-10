@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <title>mokui playground</title>
     <style>
-      body { margin: 0; font-family: system-ui, sans-serif; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto 1fr 200px; height: 100vh; }
+      body { margin: 0; font-family: system-ui, sans-serif; display: grid; grid-template-columns: minmax(320px, 40%) 1fr; grid-template-rows: auto 1fr 200px; height: 100vh; }
       header { grid-column: 1 / 3; display: flex; gap: 16px; align-items: center; padding: 8px 16px; border-bottom: 1px solid #ccc; font-size: 13px; }
       header input[type=range] { width: 240px; }
       textarea { border: 0; border-right: 1px solid #ccc; padding: 16px; font: 13px/1.5 monospace; resize: none; outline: none; grid-row: 2 / 4; }
@@ -16,8 +16,9 @@
   </head>
   <body>
     <header>
-      <label>container width <input id="w" type="range" min="280" max="1100" value="720" /> <b id="wv">720</b>px</label>
-      <span style="color:#777">breakpoints: sm 480 / md 768 / lg 1024 (container width)</span>
+      <label>container width <input id="w" type="range" min="280" max="1100" value="680" /> <b id="wv">680</b>px</label>
+      <label>theme <select id="theme"><option>modern</option><option>dark</option><option>wire</option></select></label>
+      <span style="color:#777">click things: Invite, Actions, Menu, tabs. Breakpoints: sm 480 / md 768 / lg 1024 (container width)</span>
     </header>
     <textarea id="src" spellcheck="false"></textarea>
     <div id="out"><div id="err"></div><div id="app" style="margin:0"></div></div>

@@ -11,4 +11,9 @@ stack g=lg p=lg
       text xl bold "48"
   row g=sm justify=end
     button ghost "Cancel"
-    button primary "Save"
+    button primary opens=#confirm "Save"
+  modal #confirm sm "Save changes?"
+    text "Your changes will be applied to all customers."
+    row g=sm justify=end
+      button ghost closes "Cancel"
+      button primary closes "Confirm"

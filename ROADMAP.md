@@ -4,7 +4,7 @@ Task list for building Mokui. Check items off as they land (`- [x]`). Any deviat
 
 Status legend: `[x]` done and tested, `[ ]` not done.
 
-**Status: Steps 0-5 and 7 are done. Step 6 is done except running the accuracy eval against a real model.** 106 tests pass (unit, browser, e2e).
+**Status: Steps 0-5 and 7-9 are done. Step 6 is done except running the accuracy eval against a real model.** 162 tests pass (unit, browser, e2e).
 
 ## Step 0: Registry as single source of truth
 - [x] Primitive registry: one spec per tag (attributes, allowed values, CSS rules, bare-word mapping)
@@ -77,6 +77,24 @@ Status legend: `[x]` done and tested, `[ ]` not done.
 - [x] Vite plugin test (`.mk` imports)
 - [x] Docs: install and usage per framework
 
+## Step 8: Modern look
+- [x] Design tokens and themes: `modern` (default), `dark`, `wire` through CSS variables and a `theme` attribute; `mount(..., { theme })`
+- [x] Restyle every primitive (radius, soft borders, elevation, type, accent for primary and checked states)
+- [x] `raised` flag on `box`, `card` raised by default; `grow` flag; `divider accent`
+- [x] `item` (menu and nav row), restyled `tabs`
+- [x] Browser tests for tokens and themes
+
+## Step 9: Interactions
+- [x] Interaction attributes on every tag: `opens=#x`, `toggles=#x`, `closes` / `closes=#x`
+- [x] One delegated click runtime (works inside framework apps and shadow roots), Escape closes overlays, outside click closes dropdowns
+- [x] `modal`, `drawer`, `sidebar`, `dropdown` + `menu` + `item`, `tooltip`, `toast`, `collapse`
+- [x] Stateful `tabs` + `tab` panels (replaces the static tabs recipe)
+- [x] Validation of references: missing target, duplicate names, target that cannot open, `closes` outside an overlay
+- [x] Render any state statically: `open` flag, `compile(src, { open })`, CLI `--open`, `--theme`
+- [x] `outline()` lists interactions and the states available
+- [x] Cheat sheet, docs, benchmark fixture and eval prompts updated
+- [x] Tests: unit, real-browser interaction tests, CLI states, framework consumers click through
+
 ## Notes
 Deviations from the plan and findings, recorded as work happened.
 
@@ -96,6 +114,17 @@ Deviations from the plan and findings, recorded as work happened.
 - The first cheat sheet mislabeled `min=` as a font set and did not show which attributes accept bare words. Fixed; it is generated from the registry now.
 - The canonical printer now emits bare words (`icon bell`, `grid 3`) so the outline matches what an author would write.
 - The cheat sheet costs 958 tokens and pays for itself after about 4 mocks vs Tailwind (see bench/README.md). DSL token savings: 53% vs compact mk HTML, 63% vs pretty, 66% vs Tailwind.
+
+**Steps 8 and 9 (modern look, interactions)**
+- **`tabs` is now a real element** (`tabs` + `tab` panels, or `tabs "A|B|C"` for a strip), not a recipe: switching panels needs state. The old recipe is gone.
+- **Quoted text of `modal`, `drawer` and `collapse` lives in `label`, not `title`**, because `title` shows a native browser tooltip.
+- **Bug found by looking at renders, not by the first test run:** the HTML `align` attribute is a legacy `text-align` hint, so `row align=center` centered every child's text. Fixed with a `text-align: start` reset and a regression test. Documented in TECH_DECISIONS.
+- **Sidebar state is inverted** (`closed`, visible by default) because a sidebar is normally shown; every other stateful element uses `open`.
+- **Overlays cover the nearest positioned container.** In a phone preview put the drawer inside the `frame`; outside it, it covers the whole container. This is documented but easy to get wrong.
+- **Cheat sheet grew from 958 to 1320 tokens** with the new primitives, moving break-even from about 4 to about 4-6 mocks depending on the baseline. It can be trimmed (for example merging `stack` and `row`).
+- **Default accent is near-black on purpose** so drafts do not look like a brand design. Colors are one variable away.
+- **Accessibility is minimal:** roles on controls, but overlays do not trap or restore focus and tabs, dropdowns have no arrow-key support.
+- **Still untested by a model:** whether agents write `opens=#x` flows correctly. Three interaction prompts were added to the eval for when it runs.
 
 **Not done / needs a decision**
 - **Accuracy eval against a real model.** The harness and offline scoring exist; no API key is available here and a run costs money. Until it runs, the DSL being the primary format is provisional.
