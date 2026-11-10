@@ -30,6 +30,7 @@ stack g=lg p=lg
 - [docs/USAGE.md](./docs/USAGE.md): install, frameworks, theming, CLI
 - [examples/](./examples/README.md): six screens shared by the playground, a Vue app and a React app
 - [docs/AGENTS.md](./docs/AGENTS.md): how an agent should use Mokui
+- [docs/ADDING_A_TAG.md](./docs/ADDING_A_TAG.md): where a new element, renderer or recipe goes
 - [docs/TESTING.md](./docs/TESTING.md): test layers and coverage
 - [bench/README.md](./bench/README.md), [eval/README.md](./eval/README.md): measurements
 

@@ -4,7 +4,7 @@ Task list for building Mokui. Check items off as they land (`- [x]`). Any deviat
 
 Status legend: `[x]` done and tested, `[ ]` not done.
 
-**Status: Steps 0-5 and 7-11 are done. Step 6 is done except running the accuracy eval against a real model.** 302 tests pass (unit, browser, e2e).
+**Status: Steps 0-5 and 7-12 are done. Step 6 is done except running the accuracy eval against a real model.** 310 tests pass (unit, browser, e2e).
 
 ## Step 0: Registry as single source of truth
 - [x] Primitive registry: one spec per tag (attributes, allowed values, CSS rules, bare-word mapping)
@@ -114,6 +114,13 @@ Status legend: `[x]` done and tested, `[ ]` not done.
 - [x] Playground theme editor (base, accent swatches and picker, radius, font, live JSON, copy) and the same controls in the Vue and React apps
 - [x] Tests and docs
 
+## Step 12: Source layout
+- [x] Group tags by pack under `src/tags/<pack>/`, with each tag's spec, renderer and recipe in the same folder
+- [x] `pack` declared on the spec (`inPack`), `PACKS` derived; no hand-kept list
+- [x] `theme/`, `agent/` and `runtime/` folders; entry points stay at the root so published paths do not change
+- [x] Structure tests (layout, registration, renderers, DOM-free core) mutation-checked
+- [x] `docs/ADDING_A_TAG.md`
+
 ## Notes
 Deviations from the plan and findings, recorded as work happened.
 
@@ -153,6 +160,12 @@ Deviations from the plan and findings, recorded as work happened.
 - **`icon` size is now a bare word** (`icon bell xl`).
 - **The eval's prompt set grew to 18** (three for the new elements) and loads every pack by default; `EVAL_PACKS=default` tests the cheaper sheet.
 - **Still a vocabulary, not production components:** placeholder data, no behavior beyond open / close / select. Charts have no axes values or tooltips; the calendar has no navigation.
+
+**Step 12 (source layout)**
+- **A pure refactor: no behavior changed.** The same 302 tests passed on the new layout, the bundle and the cheat sheet cost (1,560 / 2,239 tokens) are identical, and the public entry files (`dist/index.js`, `core.js`, `cli.js`, `vite-plugin.js`) did not move. Eight structure tests were added on top.
+- **Done with a script, not by hand:** a one-off script extracted each tag block and renderer from the old files and wrote the new ones, then the typecheck listed what the extraction missed (six edge cases: a stray `export` inside a function, a type import, a self-reference in the tabs renderer, a missing helper import). It was not kept in the repo.
+- **Gotcha:** `pack` is now a required field of `TagSpec`, set through `inPack`, so a spec in the wrong folder is caught by a test rather than by a reader.
+- **Deviation from the proposal:** `cli.ts` and `render-png.ts` stay at the root next to the other entry points instead of moving into `cli/`, so the `bin` path and published file names do not change. The cheat sheet's list of openable tags now follows the file order (`modal drawer toast dropdown popover sidebar collapse`); two tests that asserted the old order were made order-independent.
 
 **Step 11 (theming)**
 - **Decision: a theme is data (tokens), not a template.** Templating would add logic the constitution excludes and give nothing tokens cannot. Four layers instead: attributes (`theme`, `accent`, `radius`, `font`), `themeFromColor`, `defineTheme` / theme files / CLI, and visual editors (playground, apps).

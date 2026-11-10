@@ -83,12 +83,37 @@ Record of what we chose and why. Subordinate to [CONSTITUTION.md](./CONSTITUTION
 
 ## Architecture
 
-### Registry is the single source of truth (`src/registry.ts`)
+### Source layout
+```
+src/
+  index.ts  core.ts  vite-plugin.ts  cli.ts  render-png.ts    entry points (the package's public files)
+  tags/                       what each tag is and how it draws
+    types.ts shared.ts        TagSpec / AttrDef / Pack, shared attributes, intent and interaction attrs
+    recipe-kit.ts             builders shared by recipes
+    index.ts                  collects every spec; derives PACKS; attrDef()
+    renderers.ts              merges every *.render.ts (the DOM side)
+    core/  overlay/  forms/  feedback/  data/  nav/
+      <group>.ts              specs (pure data), for example overlay/dialogs.ts: modal, drawer, toast
+      <group>.render.ts       how those tags draw in their shadow root (only when they need to)
+      recipes.ts              recipes of that pack
+  dsl/                        parse, print, compile
+  theme/                      tokens and themes (scale), color, theme API, generated CSS
+  agent/                      cheat sheet and outline
+  runtime/                    define the custom elements, the delegated click listener, DOM helpers
+  icons/
+```
+- **One place per tag.** A tag's spec, its renderer and its recipe sit in one pack folder; adding or changing a tag no longer means editing files in four unrelated places (`docs/ADDING_A_TAG.md`).
+- **Grouped, not one file per tag.** Most specs are 8 to 15 lines, so they live in small themed files (`layout.ts`, `dialogs.ts`, `floating.ts`...). A tag gets its own files only when it has real logic: `chart` and `calendar` each have a spec and a renderer with their drawing code.
+- **Spec and renderer are separate files on purpose.** Specs are pure data, so `mokui/core` can use them in Node. Renderers touch the DOM and are only reachable from `runtime/`. `tests/unit/structure.test.ts` follows every import from `src/core.ts` and fails if `runtime/`, a renderer or the icon set becomes reachable.
+- **Entry points stay at the root** so the published file names (`dist/index.js`, `dist/core.js`, `dist/cli.js`) and the `bin` path are unchanged by internal moves.
+- **Guarded by tests:** each spec file lives in the folder of its pack, every spec is registered in the index (and nothing is registered twice), only primitives have renderers, every renderer file sits next to the spec file it draws.
+
+### Registry is the single source of truth (`src/tags/`)
 One `TagSpec` per primitive: attributes, closed value sets with their CSS, flags, which words may be bare, where quoted text goes, default ARIA role. Everything is derived from it:
-- the stylesheet per element (`src/css.ts`), including breakpoint variants
-- the custom elements (`src/elements/index.ts`)
+- the stylesheet per element (`src/theme/css.ts`), including breakpoint variants
+- the custom elements (`src/runtime/define.ts`)
 - the parser's bare-word resolution and validation (`src/dsl/parse.ts`)
-- the cheat sheet (`src/cheatsheet.ts`)
+- the cheat sheet (`src/agent/cheatsheet.ts`)
 
 Adding a primitive means adding one spec (plus a small renderer if it needs shadow content). Docs and validation cannot drift from the code.
 
@@ -101,20 +126,20 @@ Unknown tags, attributes and values are errors, all reported at once with line n
 - Container queries (not media queries) because mocks live inside panes and shadow roots. `mount()` and `<mk-frame>` are the containers.
 - `frame mobile|tablet|desktop` previews a device width.
 
-### Recipes (`src/recipes.ts`)
+### Recipes (`src/tags/*/recipes.ts`)
 `card`, `navbar`, `list`, `table`, `tr` are DSL-level macros that expand to primitives before rendering. There are no recipe elements, no extra rendering path, and the DOM stays flat and readable. See constitution section 2.7.
 
 ### Packs (a wide vocabulary that stays cheap)
-- Every tag belongs to one pack in `src/specs.ts`: `core`, `overlay`, `forms`, `feedback`, `data`, `nav`. `cheatsheet()` documents `core` and `overlay` and ends with a single index line of the other packs; `cheatsheet({ packs })` and `mokui cheatsheet <pack|all>` load more. The parser never looks at packs, so a tag used from the index line is always valid. A unit test makes sure every tag is in exactly one pack.
+- Every tag belongs to one pack, declared where the tag lives (`inPack('data', [...])`) and derived into `PACKS` by `src/tags/index.ts`: `core`, `overlay`, `forms`, `feedback`, `data`, `nav`. `cheatsheet()` documents `core` and `overlay` and ends with a single index line of the other packs; `cheatsheet({ packs })` and `mokui cheatsheet <pack|all>` load more. The parser never looks at packs, so a tag used from the index line is always valid. A unit test makes sure every tag is in exactly one pack.
 - Measured: 1,498 tokens for the default sheet, 2,177 for everything. The vocabulary roughly doubled while the default cost grew about 13%.
-- New primitives live in `src/extras.ts` (feedback, data, forms) and `src/interactive.ts`; recipes in `src/recipes.ts`. Renderers (SVG for charts, the calendar grid, stars) are in `src/elements/render.ts`.
+- The pack folders under `src/tags/` hold the specs, recipes and renderers of their tags (see Source layout above); a test keeps each spec file in the folder of its pack.
 
 ### Deterministic fake data
 Charts take optional `values`, otherwise draw fixed sample data per kind; calendars draw a fixed month (2026-11) unless `month=` is given. Nothing reads the clock or `Math.random`, so a source always renders the same picture and PNG renders can be compared. (A first version of `chart` treated a missing `values` as `[0]`; an empty-string filter fixed that, found by a test.)
 
 ### Theming (data, never templates)
 - **Why not a template language:** a template would add logic (the constitution excludes it) and gain nothing a token set cannot do. A theme is a `TokenSet` (17 tokens), nothing more.
-- **Layers:** built-in themes (`src/scale.ts`); the `theme` / `accent` / `radius` / `font` attributes (generated CSS in `src/css.ts`, validated from `INTENT` in the registry); `themeFromColor` (`src/color.ts`); `defineTheme`, `loadTheme`, `themeStyle`, `themeCssText`, `themeFile` (`src/theme.ts`); the `mokui theme` and `render --theme-file` CLI; the playground editor.
+- **Layers:** built-in themes (`src/theme/scale.ts`); the `theme` / `accent` / `radius` / `font` attributes (generated CSS in `src/theme/css.ts`, validated from `INTENT` in the registry); `themeFromColor` (`src/theme/color.ts`); `defineTheme`, `loadTheme`, `themeStyle`, `themeCssText`, `themeFile` (`src/theme/theme.ts`); the `mokui theme` and `render --theme-file` CLI; the playground editor.
 - **Accent, radius and font survive nested themes.** The five user tokens (`accent`, `on-accent`, `r`, `r-sm`, `font`) are written by every theme as `var(--mk-u-<token>, <theme value>)` and read by the elements as `var(--mk-<token>, var(--mk-u-<token>, <modern value>))`. The `accent` / `radius` / `font` attributes set only `--mk-u-*`. So `accent=emerald` on a page reaches a `theme=dark` panel inside it, and a theme and an accent on the same element do not fight over order.
 - **Named accents use `light-dark()`** (`--mk-u-accent: light-dark(#059669,#34d399)`), evaluated where the variable is used, so the same `accent=emerald` is the lighter variant in a dark subtree. A hex accent is used as given. On-accent text is computed from contrast (`contrastOn`).
 - **`themeFromColor` guarantees contrast:** in dark mode the accent is lightened step by step until it has at least 4.5:1 (WCAG AA) against the dark surface; a test checks seven colors including black and zinc.
@@ -126,11 +151,11 @@ Charts take optional `values`, otherwise draw fixed sample data per kind; calend
 - Every color, radius and shadow is a design token read through a CSS variable with the modern value as its fallback (`var(--mk-fg,#18181b)`). A `theme` attribute (`modern`, `dark`, `wire`) on any element redefines the variables for its subtree; because custom properties inherit through shadow DOM, a dark panel can sit inside a light page. `mount(..., { theme })` does the same for a whole mock.
 - Status colors (`success`, `warning`, `info`, `danger`) are tokens too: `alert`, badge variants, `rating` and `stat` deltas use them, `dark` lightens them, `wire` flattens them to the foreground color.
 - The default is modern and restrained: zinc neutrals, 12px / 8px radii, soft shadows, one accent that defaults to near-black so a draft is not mistaken for a brand design (constitution 3.5). `wire` keeps the old plain look for low-fidelity conversations.
-- Theme rules live in the shared base sheet, so adding a theme is one entry in `src/scale.ts`.
+- Theme rules live in the shared base sheet, so adding a theme is one entry in `src/theme/scale.ts`.
 
 ### Interactions
 - **Declared, not programmed (constitution 2.8).** `opens=#name`, `toggles=#name`, `closes` / `closes=#name` on any element; stateful targets are `modal`, `drawer`, `sidebar`, `dropdown`, `toast`, `collapse`. Their state is the `open` attribute (`sidebar` is visible unless `closed`). `tabs`, `collapse` and `dropdown` carry their own selection state.
-- **One delegated listener** on `document` (`src/elements/interact.ts`), installed when elements are defined. It reads `composedPath()`, so it works for markup inside Vue, React and other shadow roots, and resolves `#name` within the clicked element's own tree. The innermost element with an interaction attribute wins. Also: Escape closes the top modal or drawer, a click outside closes dropdowns, a backdrop click closes a modal.
+- **One delegated listener** on `document` (`src/runtime/interact.ts`), installed when elements are defined. It reads `composedPath()`, so it works for markup inside Vue, React and other shadow roots, and resolves `#name` within the clicked element's own tree. The innermost element with an interaction attribute wins. Also: Escape closes the top modal or drawer, a click outside closes dropdowns, a backdrop click closes a modal.
 - **Validated at parse time:** missing target (lists existing names), duplicate names, a target that cannot open, `closes` outside an overlay, `menu` outside `dropdown`, `tab` outside `tabs`.
 - **Overlays cover the nearest positioned container** (`position: absolute; inset: 0`), not the viewport, so they work in panes and inside a `frame` device preview. `mount()` positions its target and gives it a minimum height when the mock has a modal or drawer.
 - **States can be drawn statically:** the `open` flag, `compile(src, { open })`, `mount(..., { open })`, `mokui render --open name`. `outline()` lists the interactions and which states exist, so an agent can render each one.

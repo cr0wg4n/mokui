@@ -22,13 +22,14 @@ nub exec playwright install chromium
 ```
 The Chromium build must match the installed Playwright version. If tests fail with `Executable doesn't exist`, rerun the install command.
 
-## Coverage (302 tests)
+## Coverage (310 tests)
 
-**Unit (100)**
+**Unit (108)**
 - `dsl` (16): nesting, attrs, bare words per tag, quoted attribute values, flags, `#name`, intent attrs; prototype names rejected; all errors reported at once with line numbers and valid options; breakpoint variants only on responsive attrs; indent errors; print round-trip with bare words; every recipe's expansion; recipes expand to primitives only.
 - `interactions` (15): `opens` / `toggles` / `closes` parsing and print round-trip; missing target (lists the names that exist), duplicate names, target that cannot open, `closes` outside an overlay, `menu` outside `dropdown`, `tab` outside `tabs`; `compile` with `open` states (including sidebar, unknown names, recipes); outline flows and states; cheat sheet content.
 - `agent-views` (5): outline tree, interactive inventory, notes, recipe expansion on request; cheat sheet covers every tag and stays compact.
 - `extras` (18): packs (every tag in exactly one pack, default sheet vs `all`, unknown pack error, the parser accepts every tag regardless of packs); parsing and validation of every new primitive; the newline escape; the expansion of every new recipe.
+- `structure` (8): the source layout. Each spec file lives in the folder of its pack, the pack folders are exactly the packs, every tag in a spec file is registered in the index (once), packs cover every tag once, only primitives have renderers, every renderer file sits next to the spec file it draws and declares only tags of its own pack, and following every import from `src/core.ts` never reaches `runtime/`, a renderer or the icon set (so `mokui/core` stays DOM-free). Mutation-checked: moving a tag to the wrong pack or importing DOM code into the core makes it fail.
 - `theme` (30): color helpers (hex parsing, hsl round-trip, luminance, contrast, readable text); `themeFromColor` (light and dark neutrals ordered by luminance, hue carried over, AA contrast for seven colors, `neutrals: false`, bad input); `themeStyle` (tokens, user variables that reach nested themes, `light-dark` for named accents, hex accents with readable text, radius, font, token overrides, clear errors with the valid values); `themeCssText`; `defineTheme` (registers for the parser, `themeStyle` and the cheat sheet; name rules; duplicates; from one color); theme files (`loadTheme` reports every problem, `themeFile` round-trips); the DSL attributes and the cheat sheet.
 - `playground` (8): every playground example compiles and has an outline, ids are unique, and together the examples use more than 85% of the vocabulary (so a new tag that no example shows is noticed).
 - `eval-score` (7): scoring of valid, incomplete and invalid mocks (including interaction prompts), fence extraction, prompt set sanity.
