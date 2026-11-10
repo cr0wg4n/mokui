@@ -1,7 +1,7 @@
-import { expand } from './dsl/compile'
-import { parse, type MkNode } from './dsl/parse'
-import { print } from './dsl/print'
-import { specs } from './specs'
+import { expand } from '../dsl/compile'
+import { parse, type MkNode } from '../dsl/parse'
+import { print } from '../dsl/print'
+import { specs } from '../tags'
 
 const INTERACTIVE = ['button', 'input', 'textarea', 'select', 'checkbox', 'radio', 'switch', 'slider', 'tabs', 'collapse', 'dropdown', 'popover', 'segmented', 'upload', 'otp']
 

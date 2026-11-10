@@ -1,5 +1,5 @@
 import { contrastOn, luminance, parseHex, themeFromColor, type FromColorOptions } from './color'
-import { INTENT } from './registry'
+import { INTENT } from '../tags/shared'
 import { accents, fonts, radii, themeListeners, themes, themeVars, TOKENS, type ThemeName, type TokenSet } from './scale'
 
 /**

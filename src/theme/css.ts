@@ -1,6 +1,6 @@
 import { contrastOn, luminance } from './color'
 import { accents, fonts, radii, scale, themes, themeVars, v } from './scale'
-import type { TagSpec } from './registry'
+import type { TagSpec } from '../tags/types'
 
 /** Styles shared by every element. */
 /** CSS for one theme: its tokens, a background and text color, and the matching color-scheme. */

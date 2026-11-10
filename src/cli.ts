@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 import { readFileSync } from 'node:fs'
-import { cheatsheet } from './cheatsheet'
-import { loadTheme, themeCssText, themeFile, type ThemeOptions } from './theme'
+import { cheatsheet } from './agent/cheatsheet'
+import { loadTheme, themeCssText, themeFile, type ThemeOptions } from './theme/theme'
 import { MkError } from './dsl/parse'
-import { outline } from './outline'
+import { outline } from './agent/outline'
 import { renderPng } from './render-png'
 
 const usage = `mokui <command>

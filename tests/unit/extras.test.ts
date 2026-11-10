@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { cheatsheet, compile, MkError, PACKS, parse, print } from '../../src/core'
-import { all, packOf } from '../../src/specs'
+import { all, packOf } from '../../src/tags'
 
 const err = (src: string) => {
   try {

@@ -6,9 +6,9 @@
   "license": "MIT",
   "sideEffects": [
     "./dist/index.js",
-    "./dist/elements/*.js",
+    "./dist/runtime/define.js",
     "./src/index.ts",
-    "./src/elements/*.ts"
+    "./src/runtime/define.ts"
   ],
   "files": [
     "dist"

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { contrast, contrastOn, hslToHex, luminance, parseHex, rgbToHsl } from '../../src/color'
+import { contrast, contrastOn, hslToHex, luminance, parseHex, rgbToHsl } from '../../src/theme/color'
 import { cheatsheet, defineTheme, loadTheme, parse, themeCssText, themeFile, themeFromColor, themeStyle, themes } from '../../src/core'
 
 const lum = (c: string | undefined) => luminance(c!)

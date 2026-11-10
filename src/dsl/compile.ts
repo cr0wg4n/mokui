@@ -1,4 +1,4 @@
-import { specs } from '../specs'
+import { specs } from '../tags'
 import { MkError, parse, toHTML, type MkNode } from './parse'
 
 /** Expand recipes (top-down) until only primitives remain. */

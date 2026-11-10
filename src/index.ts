@@ -1,7 +1,7 @@
-import './elements/index'
+import './runtime/define'
 import { compile, hasOverlay } from './dsl/compile'
 import { toHTML } from './dsl/parse'
-import { themeStyle, type ThemeInput } from './theme'
+import { themeStyle, type ThemeInput } from './theme/theme'
 
 export * from './core'
 export { icons } from './icons/index'

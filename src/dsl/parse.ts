@@ -1,5 +1,6 @@
-import { INTENT, INTERACT, type RNode } from '../registry'
-import { attrDef, specs } from '../specs'
+import { INTENT, INTERACT } from '../tags/shared'
+import type { RNode } from '../tags/types'
+import { attrDef, specs } from '../tags'
 
 export type MkNode = RNode
 

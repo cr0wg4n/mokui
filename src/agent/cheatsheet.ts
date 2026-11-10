@@ -1,6 +1,6 @@
-import { scale } from './scale'
-import { INTENT, INTERACT } from './registry'
-import { all, DEFAULT_PACKS, PACKS } from './specs'
+import { scale } from '../theme/scale'
+import { INTENT, INTERACT } from '../tags/shared'
+import { all, DEFAULT_PACKS, PACKS } from '../tags'
 
 const names = (o: object) => Object.keys(o).join('|')
 // Named value sets, applied only to the attributes that really use that scale.

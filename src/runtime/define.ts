@@ -1,8 +1,8 @@
-import { baseCss, cssFor, themeRule } from '../css'
-import { themeListeners } from '../scale'
-import { primitives } from '../specs'
+import { baseCss, cssFor, themeRule } from '../theme/css'
+import { themeListeners } from '../theme/scale'
+import { primitives } from '../tags'
 import { installInteractions } from './interact'
-import { renderers } from './render'
+import { renderers } from '../tags/renderers'
 
 const sheet = (css: string) => {
   const s = new CSSStyleSheet()

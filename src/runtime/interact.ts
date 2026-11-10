@@ -1,4 +1,4 @@
-import { primitives } from '../specs'
+import { primitives } from '../tags'
 
 const stateful = new Map(primitives.filter((s) => s.stateful).map((s) => [`mk-${s.tag}`, s]))
 const OVERLAYS = 'mk-modal[open],mk-drawer[open]'

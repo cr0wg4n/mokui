@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { html } from './dsl/compile'
-import { themeStyle, type ThemeInput } from './theme'
+import { themeStyle, type ThemeInput } from './theme/theme'
 
 export interface RenderOptions {
   /** Container width in px (default 600). Breakpoints respond to this. */

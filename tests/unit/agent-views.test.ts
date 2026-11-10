@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { cheatsheet, outline } from '../../src/index'
-import { all } from '../../src/specs'
+import { all } from '../../src/tags'
 
 describe('outline', () => {
   const src = [

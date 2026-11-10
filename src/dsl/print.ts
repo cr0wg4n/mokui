@@ -1,4 +1,4 @@
-import { specs } from '../specs'
+import { specs } from '../tags'
 import type { MkNode } from './parse'
 
 const q = (s: string) => `"${s.replace(/"/g, '\\"').replace(/\n/g, '\\n')}"`
