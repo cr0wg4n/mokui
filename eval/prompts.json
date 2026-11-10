@@ -1,26 +1,225 @@
 [
-  { "id": "login", "prompt": "A login screen: logo icon, welcome title, email and password fields, a primary sign-in button, a remember-me checkbox and a link to sign up.",
-    "expect": { "tags": { "input": 2, "button": 1, "checkbox": 1, "icon": 1 } } },
-  { "id": "dashboard", "prompt": "A dashboard with a top bar (brand, notifications bell, user avatar) and three KPI cards: visits, users, tasks.",
-    "expect": { "tags": { "icon": 1, "avatar": 1 }, "anyOf": [["navbar", "row"]], "minElements": 8 } },
-  { "id": "settings-list", "prompt": "A settings page: title, then rows for Account, Notifications, Privacy and Sign out, each with an icon and a chevron.",
-    "expect": { "tags": { "icon": 8 }, "text": ["Account", "Notifications", "Privacy", "Sign out"] } },
-  { "id": "product-list", "prompt": "A product list: three items each with an image, name, short description, price and an Add button.",
-    "expect": { "tags": { "image": 3, "button": 3 } } },
-  { "id": "profile-form", "prompt": "A profile form with full name, email, a role dropdown (Admin, Editor, Viewer), a bio textarea, a notifications switch and Cancel and Save buttons.",
-    "expect": { "tags": { "input": 2, "select": 1, "textarea": 1, "switch": 1, "button": 2 }, "text": ["Save", "Cancel"] } },
-  { "id": "admin-table", "prompt": "An admin users page: navbar, a heading, a search field and an Invite button, then a table of users with name, email, role and status.",
-    "expect": { "tags": { "table": 1, "button": 1 }, "anyOf": [["input"]] } },
-  { "id": "pricing", "prompt": "A pricing page with three plans (Free, Pro, Team), each with a price, a feature list and a button. Pro is highlighted as most popular. Reflow to one column on narrow screens.",
-    "expect": { "tags": { "button": 3 }, "text": ["Free", "Pro", "Team"], "anyOf": [["grid"]], "noted": true } },
-  { "id": "mobile-feed", "prompt": "A mobile social feed preview: header with title and search icon, then three posts each with avatar, author name, an image and like and comment icons.",
-    "expect": { "tags": { "avatar": 3, "image": 3 }, "anyOf": [["frame"]] } },
-  { "id": "checkout", "prompt": "A checkout form: shipping address fields (name, address, city, postal code), a country dropdown, a payment method radio group (card, paypal) and a Pay now button.",
-    "expect": { "tags": { "input": 4, "select": 1, "radio": 2, "button": 1 } } },
-  { "id": "onboarding-tabs", "prompt": "A tabbed onboarding screen with tabs Profile, Team and Billing (Team active), and under it a form with a company name field and a Continue button.",
-    "expect": { "tags": { "input": 1, "button": 1 }, "anyOf": [["tabs"]] } },
-  { "id": "inbox", "prompt": "An email inbox: sidebar with Inbox, Sent and Trash entries with icons, and a list of three messages each with sender, subject and a time.",
-    "expect": { "tags": { "icon": 3 }, "text": ["Inbox", "Sent", "Trash"] } },
-  { "id": "media-controls", "prompt": "A music player: album art image, song title and artist, a progress slider and previous, play and next icon buttons.",
-    "expect": { "tags": { "image": 1, "slider": 1, "icon": 3 } } }
+  {
+    "id": "login",
+    "prompt": "A login screen: logo icon, welcome title, email and password fields, a primary sign-in button, a remember-me checkbox and a link to sign up.",
+    "expect": {
+      "tags": {
+        "input": 2,
+        "button": 1,
+        "checkbox": 1,
+        "icon": 1
+      }
+    }
+  },
+  {
+    "id": "dashboard",
+    "prompt": "A dashboard with a top bar (brand, notifications bell, user avatar) and three KPI cards: visits, users, tasks.",
+    "expect": {
+      "tags": {
+        "icon": 1,
+        "avatar": 1
+      },
+      "anyOf": [
+        [
+          "navbar",
+          "row"
+        ]
+      ],
+      "minElements": 8
+    }
+  },
+  {
+    "id": "settings-list",
+    "prompt": "A settings page: title, then rows for Account, Notifications, Privacy and Sign out, each with an icon and a chevron.",
+    "expect": {
+      "tags": {
+        "icon": 8
+      },
+      "text": [
+        "Account",
+        "Notifications",
+        "Privacy",
+        "Sign out"
+      ]
+    }
+  },
+  {
+    "id": "product-list",
+    "prompt": "A product list: three items each with an image, name, short description, price and an Add button.",
+    "expect": {
+      "tags": {
+        "image": 3,
+        "button": 3
+      }
+    }
+  },
+  {
+    "id": "profile-form",
+    "prompt": "A profile form with full name, email, a role dropdown (Admin, Editor, Viewer), a bio textarea, a notifications switch and Cancel and Save buttons.",
+    "expect": {
+      "tags": {
+        "input": 2,
+        "select": 1,
+        "textarea": 1,
+        "switch": 1,
+        "button": 2
+      },
+      "text": [
+        "Save",
+        "Cancel"
+      ]
+    }
+  },
+  {
+    "id": "admin-table",
+    "prompt": "An admin users page: navbar, a heading, a search field and an Invite button, then a table of users with name, email, role and status.",
+    "expect": {
+      "tags": {
+        "table": 1,
+        "button": 1
+      },
+      "anyOf": [
+        [
+          "input"
+        ]
+      ]
+    }
+  },
+  {
+    "id": "pricing",
+    "prompt": "A pricing page with three plans (Free, Pro, Team), each with a price, a feature list and a button. Pro is highlighted as most popular. Reflow to one column on narrow screens.",
+    "expect": {
+      "tags": {
+        "button": 3
+      },
+      "text": [
+        "Free",
+        "Pro",
+        "Team"
+      ],
+      "anyOf": [
+        [
+          "grid"
+        ]
+      ],
+      "noted": true
+    }
+  },
+  {
+    "id": "mobile-feed",
+    "prompt": "A mobile social feed preview: header with title and search icon, then three posts each with avatar, author name, an image and like and comment icons.",
+    "expect": {
+      "tags": {
+        "avatar": 3,
+        "image": 3
+      },
+      "anyOf": [
+        [
+          "frame"
+        ]
+      ]
+    }
+  },
+  {
+    "id": "checkout",
+    "prompt": "A checkout form: shipping address fields (name, address, city, postal code), a country dropdown, a payment method radio group (card, paypal) and a Pay now button.",
+    "expect": {
+      "tags": {
+        "input": 4,
+        "select": 1,
+        "radio": 2,
+        "button": 1
+      }
+    }
+  },
+  {
+    "id": "onboarding-tabs",
+    "prompt": "A tabbed onboarding screen with tabs Profile, Team and Billing (Team active), and under it a form with a company name field and a Continue button.",
+    "expect": {
+      "tags": {
+        "input": 1,
+        "button": 1
+      },
+      "anyOf": [
+        [
+          "tabs"
+        ]
+      ]
+    }
+  },
+  {
+    "id": "inbox",
+    "prompt": "An email inbox: sidebar with Inbox, Sent and Trash entries with icons, and a list of three messages each with sender, subject and a time.",
+    "expect": {
+      "tags": {
+        "icon": 3
+      },
+      "text": [
+        "Inbox",
+        "Sent",
+        "Trash"
+      ]
+    }
+  },
+  {
+    "id": "media-controls",
+    "prompt": "A music player: album art image, song title and artist, a progress slider and previous, play and next icon buttons.",
+    "expect": {
+      "tags": {
+        "image": 1,
+        "slider": 1,
+        "icon": 3
+      }
+    }
+  },
+  {
+    "id": "delete-confirm",
+    "prompt": "A project page with a Delete project button. Clicking it opens a confirmation dialog titled 'Delete project?' with a warning sentence and Cancel and Delete buttons; both close the dialog.",
+    "expect": {
+      "tags": {
+        "button": 3,
+        "modal": 1
+      },
+      "text": [
+        "Delete project",
+        "Cancel",
+        "Delete"
+      ],
+      "minElements": 6
+    }
+  },
+  {
+    "id": "app-shell",
+    "prompt": "An app shell: a left sidebar with Dashboard, Customers and Settings entries (Dashboard active), a top bar with a menu button that collapses the sidebar, and a content area with a heading.",
+    "expect": {
+      "tags": {
+        "sidebar": 1,
+        "item": 3,
+        "button": 1
+      },
+      "text": [
+        "Dashboard",
+        "Customers",
+        "Settings"
+      ]
+    }
+  },
+  {
+    "id": "actions-menu",
+    "prompt": "A table row toolbar with an Actions button that opens a dropdown menu with Edit, Duplicate and Delete (Delete in red), and a toast 'Saved' that appears after saving.",
+    "expect": {
+      "tags": {
+        "dropdown": 1,
+        "menu": 1,
+        "item": 3,
+        "toast": 1
+      },
+      "text": [
+        "Edit",
+        "Duplicate",
+        "Delete",
+        "Saved"
+      ]
+    }
+  }
 ]

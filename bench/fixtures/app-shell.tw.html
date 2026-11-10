@@ -1,0 +1,51 @@
+<div class="flex h-full">
+  <aside id="nav" class="flex flex-col gap-1 w-60 p-3 border-r">
+    <div class="flex gap-2 items-center p-2"><div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">A</div><span class="font-bold">Acme</span></div>
+    <a class="flex gap-2 items-center px-3 py-2 rounded-lg bg-gray-100 font-semibold"><svg class="w-5 h-5" data-icon="home"></svg>Dashboard</a>
+    <a class="flex gap-2 items-center px-3 py-2 rounded-lg"><svg class="w-5 h-5" data-icon="user"></svg>Customers</a>
+    <a class="flex gap-2 items-center px-3 py-2 rounded-lg"><svg class="w-5 h-5" data-icon="mail"></svg>Messages</a>
+    <a class="flex gap-2 items-center px-3 py-2 rounded-lg"><svg class="w-5 h-5" data-icon="settings"></svg>Settings</a>
+    <div class="flex-1"></div>
+    <a class="flex gap-2 items-center px-3 py-2 rounded-lg text-red-600"><svg class="w-5 h-5" data-icon="log-out"></svg>Sign out</a>
+  </aside>
+  <main class="flex flex-col gap-4 p-4 flex-1">
+    <div class="flex gap-3 items-center">
+      <button class="px-4 py-2 flex gap-2" data-toggle="nav"><svg class="w-5 h-5" data-icon="menu"></svg>Menu</button>
+      <h1 class="text-2xl font-bold">Customers</h1>
+      <div class="flex-1"></div>
+      <div class="flex items-center gap-2 border rounded-lg px-3 py-2"><svg class="w-5 h-5" data-icon="search"></svg><input placeholder="Search" /></div>
+      <div class="relative">
+        <button class="px-4 py-2 border rounded-lg flex gap-2" data-toggle="more"><svg class="w-5 h-5" data-icon="more-horizontal"></svg>Actions</button>
+        <div id="more" class="hidden absolute right-0 mt-1 p-1 border rounded-xl shadow-lg w-52">
+          <a class="flex gap-2 px-3 py-2"><svg class="w-5 h-5" data-icon="pencil"></svg>Edit</a>
+          <a class="flex gap-2 px-3 py-2"><svg class="w-5 h-5" data-icon="download"></svg>Export</a>
+          <hr />
+          <a class="flex gap-2 px-3 py-2 text-red-600"><svg class="w-5 h-5" data-icon="trash"></svg>Delete</a>
+        </div>
+      </div>
+      <button class="px-4 py-2 bg-black text-white rounded-lg flex gap-2" data-open="invite"><svg class="w-5 h-5" data-icon="plus"></svg>Invite</button>
+    </div>
+    <div role="tablist" class="flex border-b"><button role="tab" aria-selected="true" class="px-3 py-2 border-b-2 border-black">All</button><button role="tab" class="px-3 py-2 text-gray-500">Billing</button></div>
+    <div role="tabpanel" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div class="border rounded-xl p-3 shadow-sm flex flex-col gap-2"><h2 class="text-lg font-semibold">Active</h2><p class="text-2xl font-bold">1,204</p><span class="px-2 text-xs rounded-full bg-black text-white w-fit">+12%</span></div>
+      <div class="border rounded-xl p-3 shadow-sm flex flex-col gap-2"><h2 class="text-lg font-semibold">Trial</h2><p class="text-2xl font-bold">320</p><span class="px-2 text-xs rounded-full bg-gray-100 w-fit">steady</span></div>
+      <div class="border rounded-xl p-3 shadow-sm flex flex-col gap-2"><h2 class="text-lg font-semibold">Churned</h2><p class="text-2xl font-bold">48</p><span class="px-2 text-xs rounded-full bg-gray-100 w-fit">-2%</span></div>
+    </div>
+    <div role="tabpanel" class="hidden"><p>Billing panel</p></div>
+    <table class="w-full text-left">
+      <thead class="border-b"><tr><th class="p-2">Name</th><th class="p-2">Plan</th><th class="p-2">Status</th></tr></thead>
+      <tbody>
+        <tr class="border-b"><td class="p-2">Ana Martin</td><td class="p-2">Pro</td><td class="p-2">Active</td></tr>
+        <tr class="border-b"><td class="p-2">Bo Lee</td><td class="p-2">Free</td><td class="p-2">Trial</td></tr>
+      </tbody>
+    </table>
+  </main>
+  <div id="invite" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center">
+    <div role="dialog" class="bg-white rounded-2xl p-5 w-[480px] flex flex-col gap-3">
+      <div class="flex items-center"><h2 class="flex-1 text-lg font-semibold">Invite teammate</h2><button data-close aria-label="Close"><svg class="w-4 h-4" data-icon="x"></svg></button></div>
+      <label class="flex flex-col gap-1">Email<input type="email" class="border rounded-lg p-2" placeholder="name@company.com" /></label>
+      <label class="flex flex-col gap-1">Role<select class="border rounded-lg p-2"><option>Admin</option><option>Editor</option><option>Viewer</option></select></label>
+      <div class="flex gap-2 justify-end"><button data-close class="px-4 py-2">Cancel</button><button data-close class="px-4 py-2 bg-black text-white rounded-lg">Send invite</button></div>
+    </div>
+  </div>
+</div>

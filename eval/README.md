@@ -13,7 +13,7 @@ Results are written to `eval/RESULTS.md`.
 Only the synthetic prompts in `prompts.json` plus the cheat sheet. No project code or personal data.
 
 ## Method
-- 12 requirement prompts (login, dashboard, settings, product list, profile form, admin table, pricing, mobile feed, checkout, onboarding tabs, inbox, media controls).
+- 15 requirement prompts (login, dashboard, settings, product list, profile form, admin table, pricing, mobile feed, checkout, onboarding tabs, inbox, media controls, and three interaction prompts: delete-confirm modal, app shell with collapsible sidebar, actions dropdown with a toast).
 - Each has expectations: minimum counts per tag, alternatives (`anyOf`), required text, optional note requirement.
 - **Valid** = parses and validates against the registry. **Complete** = valid and meets the expectations.
 - Recipes count as written; if a recipe is not written, its primitives count.
@@ -23,6 +23,6 @@ Only the synthetic prompts in `prompts.json` plus the cheat sheet. No project co
 Per prompt: first-try valid / complete, and valid / complete after one repair. If first-try validity is low, the vocabulary or cheat sheet is too hard. If complete is low but valid is high, the cheat sheet is not teaching enough about what to include.
 
 ## Limits
-- 12 prompts is a small sample; run several models and repeats before concluding.
+- 15 prompts is a small sample; run several models and repeats before concluding.
 - Completeness checks are structural, not visual: they do not judge whether the layout is good.
 - No baseline yet for HTML or Tailwind accuracy. Token savings only matter if accuracy is comparable.
