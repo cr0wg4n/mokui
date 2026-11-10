@@ -1,6 +1,7 @@
 import { existsSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { html } from './dsl/compile'
+import { themeStyle, type ThemeInput } from './theme'
 
 export interface RenderOptions {
   /** Container width in px (default 600). Breakpoints respond to this. */
@@ -11,8 +12,8 @@ export interface RenderOptions {
   scale?: number
   /** Names of stateful elements to draw open (modal, drawer, dropdown...). */
   open?: string[]
-  /** Look: modern (default), dark or wire. */
-  theme?: 'modern' | 'dark' | 'wire'
+  /** Look: a theme name or theme options (base, accent, radius, font, tokens). */
+  theme?: ThemeInput
 }
 
 /** Browser bundle sits next to this file's dist output: dist/browser/mokui.iife.js */
@@ -30,6 +31,7 @@ const bundle = () => {
  */
 export async function renderPng(src: string, opts: RenderOptions): Promise<void> {
   html(src, { open: opts.open }) // fail fast with line-numbered errors
+  if (opts.theme) themeStyle(opts.theme) // and with a clear theme error
   let pw: typeof import('playwright')
   try {
     pw = await import('playwright')

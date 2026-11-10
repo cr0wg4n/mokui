@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { readFileSync } from 'node:fs'
 import { cheatsheet } from './cheatsheet'
+import { loadTheme, themeCssText, themeFile, type ThemeOptions } from './theme'
 import { MkError } from './dsl/parse'
 import { outline } from './outline'
 import { renderPng } from './render-png'
@@ -24,9 +25,34 @@ try {
     const out = flag('--out', '-o')
     if (!out) throw new Error('render needs -o <file.png>')
     const open = flag('--open', '--open')?.split(',').filter(Boolean)
-    const theme = flag('--theme', '--theme') as 'modern' | 'dark' | 'wire' | undefined
-    await renderPng(read(rest[0]), { out, width: Number(flag('--width', '-w') ?? 600), open, theme })
+    const theme: ThemeOptions = {}
+    const file = flag('--theme-file', '--theme-file')
+    if (file) {
+      const { name: _name, ...loaded } = loadTheme(JSON.parse(readFileSync(file, 'utf8')))
+      Object.assign(theme, loaded)
+    }
+    const base = flag('--theme', '--theme')
+    const accent = flag('--accent', '--accent')
+    const radius = flag('--radius', '--radius')
+    const font = flag('--font', '--font')
+    if (base) theme.base = base
+    if (accent) theme.accent = accent
+    if (radius) theme.radius = radius as ThemeOptions['radius']
+    if (font) theme.font = font as ThemeOptions['font']
+    await renderPng(read(rest[0]), { out, width: Number(flag('--width', '-w') ?? 600), open, theme: Object.keys(theme).length ? theme : undefined })
     console.log(out)
+  } else if (cmd === 'theme') {
+    const color = rest[0]
+    if (!color || color.startsWith('-')) throw new Error('theme needs a color, e.g. mokui theme "#4f46e5" --mode dark')
+    const mode = flag('--mode', '--mode')
+    if (mode && mode !== 'light' && mode !== 'dark') throw new Error('--mode must be light or dark')
+    const file = themeFile(color, {
+      mode: mode as 'light' | 'dark' | undefined,
+      name: flag('--name', '--name'),
+      radius: flag('--radius', '--radius') as ThemeOptions['radius'],
+      font: flag('--font', '--font') as ThemeOptions['font'],
+    })
+    console.log(rest.includes('--css') ? themeCssText(file) : JSON.stringify(file, null, 2))
   } else console.log(usage)
 } catch (e) {
   console.error(e instanceof MkError ? e.message : (e as Error).message)

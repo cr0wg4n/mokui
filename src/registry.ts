@@ -1,4 +1,4 @@
-import { scale, v } from './scale'
+import { accents, scale, themes, v } from './scale'
 
 /** One attribute of a tag. */
 export interface AttrDef {
@@ -77,7 +77,10 @@ export const INTENT: Record<string, AttrDef> = {
   name: { doc: 'identifier, e.g. #login-btn', free: true },
   role: { doc: 'semantic role, also the ARIA role', free: true },
   note: { doc: 'requirement note shown in the outline', free: true },
-  theme: { doc: 'look for this subtree', rules: { modern: '', dark: '', wire: '' } },
+  theme: { doc: 'look for this subtree', rules: Object.fromEntries(Object.keys(themes).map((k) => [k, ''])) },
+  accent: { doc: 'accent color for this subtree', rules: Object.fromEntries(Object.keys(accents).map((k) => [k, ''])) },
+  radius: { doc: 'corner roundness', rules: { sharp: '', soft: '', round: '' } },
+  font: { doc: 'typeface', rules: { sans: '', serif: '', mono: '' } },
 }
 
 /** Declared interactions, available on every tag. Targets are `#name` of a stateful element. */

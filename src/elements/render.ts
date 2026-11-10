@@ -1,4 +1,5 @@
 import { icons } from '../icons/index'
+import { v } from '../scale'
 
 const SVG = 'http://www.w3.org/2000/svg'
 const PLACEHOLDER = '<rect x="3" y="3" width="18" height="18" rx="2" stroke-dasharray="3 3"/>'
@@ -207,7 +208,7 @@ const el = (tag: string, attrs: Record<string, string | number>) => {
   for (const [k, val] of Object.entries(attrs)) e.setAttribute(k, String(val))
   return e
 }
-const accent = 'var(--mk-accent,#18181b)'
+const accent = v('accent')
 
 /** Deterministic chart: fake data by default, `values` overrides. Never random. */
 function drawChart(host: HTMLElement, root: ShadowRoot) {

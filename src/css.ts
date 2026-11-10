@@ -1,19 +1,28 @@
-import { scale, themes } from './scale'
+import { contrastOn, luminance } from './color'
+import { accents, fonts, radii, scale, themes, themeVars, v } from './scale'
 import type { TagSpec } from './registry'
 
 /** Styles shared by every element. */
-const themeCss = Object.entries(themes)
-  .map(([name, t]) => {
-    const vars = Object.entries(t).map(([k, val]) => `--mk-${k}:${val}`).join(';')
-    return `:host([theme="${name}"]){${vars};background:${t.bg};color:${t.fg};color-scheme:${name === 'dark' ? 'dark' : 'light'}}`
-  })
-  .join('')
+/** CSS for one theme: its tokens, a background and text color, and the matching color-scheme. */
+export const themeRule = (name: string): string => {
+  const t = themes[name]!
+  const dark = luminance(t.bg) < 0.25
+  return `:host([theme="${name}"]){${themeVars(t).join(';')};background:${t.bg};color:${t.fg};color-scheme:${dark ? 'dark' : 'light'}}`
+}
 
-export const baseCss =
-  ':host{display:block;box-sizing:border-box;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;color:var(--mk-fg,#18181b);line-height:1.5;-webkit-font-smoothing:antialiased;text-align:start}' +
+/** Accent, radius and font presets. They set `--mk-u-*`, which every theme reads, so they survive nested themes. */
+const userCss = () =>
+  Object.entries(accents).map(([n, [l, d]]) => `:host([accent="${n}"]){--mk-u-accent:light-dark(${l},${d});--mk-u-on-accent:light-dark(${contrastOn(l)},${contrastOn(d)})}`).join('') +
+  Object.entries(radii).map(([n, [r, rs]]) => `:host([radius="${n}"]){--mk-u-r:${r};--mk-u-r-sm:${rs}}`).join('') +
+  Object.entries(fonts).map(([n, f]) => `:host([font="${n}"]){--mk-u-font:${f}}`).join('')
+
+/** Styles shared by every element. Built when elements are defined, so registered themes are included. */
+export const baseCss = (): string =>
+  `:host{display:block;box-sizing:border-box;font-family:${v('font')};color:${v('fg')};line-height:1.5;-webkit-font-smoothing:antialiased;text-align:start}` +
   ':host *{box-sizing:border-box}:host([hidden]){display:none !important}' +
   ':host([opens]),:host([toggles]),:host([closes]){cursor:pointer}' +
-  themeCss
+  Object.keys(themes).map(themeRule).join('') +
+  userCss()
 
 /** Generate the stylesheet for one tag from its spec. Attribute rules come first, then breakpoint variants. */
 export function cssFor(spec: TagSpec): string {
