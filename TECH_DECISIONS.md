@@ -10,8 +10,8 @@ Record of what we chose and why. Subordinate to [CONSTITUTION.md](./CONSTITUTION
 | Styling | Plain CSS, constructable stylesheets, CSS custom-property scales, attribute selectors |
 | CSS framework | None |
 | Icons | Bundled SVG path map, Lucide names |
-| Authoring | Indentation-based DSL (primary), HTML tags (secondary) |
-| Integration | Vite plugin or plain import |
+| Authoring | Indentation-based DSL (primary), HTML tags (secondary); recipes for composites |
+| Integration | Vite plugin or plain import; Node-safe `mokui/core`; CLI |
 | Language / tests | Strict TypeScript, Vitest + token benchmarks |
 | Package manager | `nub` |
 | Runtime deps | Zero |
@@ -38,9 +38,10 @@ Record of what we chose and why. Subordinate to [CONSTITUTION.md](./CONSTITUTION
 - Open Props only provides tokens; ~30 lines of our own variables replace it.
 
 ### Icons
-- A map of about 100-150 icon names to SVG path strings, using Lucide naming because LLMs already know those names.
-- Exported as individual modules so bundlers can tree-shake unused icons.
-- Unknown names render a visible placeholder and warn; they never fail silently.
+- 30 Lucide-named icons as inner SVG markup in one map (`src/icons/index.ts`), about 1.4 KB gzipped. `settings` is a simplified approximation of the Lucide shape.
+- Lucide naming because LLMs already know those names.
+- Unknown names render a dashed placeholder and warn with the valid list; they never fail silently.
+- Deviation from the first plan: not one module per icon. A single map is small enough that per-icon tree-shaking is not worth the complexity. `mokui/core` ships no icons at all.
 - No Iconify, no network fetches.
 
 ### Authoring format
@@ -53,8 +54,9 @@ Record of what we chose and why. Subordinate to [CONSTITUTION.md](./CONSTITUTION
   ```
 
 - A small hand-written parser (no parser-generator dependency) produces the same custom-element tree, so DSL and HTML are equivalent and share one render path.
+- Syntax: `tag [bare words] [key=value] ["text"] [#name]`. `//` starts a comment line (`#` is reserved for names). Quoted attribute values (`label="Full name"`) and boolean flags (`disabled`) are supported.
 - **Secondary:** raw HTML tags (`<mk-row g="md">`) work with no parser at all.
-- Preliminary benchmark: about 44% fewer tokens than compact HTML, 56% than pretty HTML, 61% than Tailwind HTML (4 fixtures, proxy tokenizer). See [bench/README.md](./bench/README.md) for method and caveats. Still provisional until the cheat-sheet cost and LLM generation accuracy are measured.
+- Benchmark (7 fixtures, proxy tokenizer): 53% fewer tokens than compact mk HTML, 63% than pretty, 66% than Tailwind HTML. The cheat sheet costs 958 tokens and pays back after about 4 mocks. See [bench/README.md](./bench/README.md). Still provisional until LLM generation accuracy is measured ([eval/README.md](./eval/README.md)).
 
 ### Vite integration
 - Entry point registers all elements as a side effect, with a sub-path export per primitive for tree-shaking.
@@ -63,18 +65,52 @@ Record of what we chose and why. Subordinate to [CONSTITUTION.md](./CONSTITUTION
 
 ### Tooling
 - **TypeScript**, strict, fully typed public API; ships ESM with `.d.ts`.
-- **Vitest** with two projects: `unit` (happy-dom, pure logic) and `browser` (real headless Chromium via `@vitest/browser-playwright`). happy-dom does not compute shadow-DOM styles, so all styling assertions run in the browser project. See [docs/TESTING.md](./docs/TESTING.md).
+- **Vitest** with three projects (`unit`, `browser`, `e2e`): `unit` = happy-dom for pure logic, browser = real headless Chromium via `@vitest/browser-playwright`, e2e = built CLI and Vue/React consumers. happy-dom does not compute shadow-DOM styles, so all styling assertions run in the browser project. See [docs/TESTING.md](./docs/TESTING.md).
 - **Token benchmarks:** fixture mocks in DSL vs HTML vs Tailwind, counted with `gpt-tokenizer` (a proxy for Claude's tokenizer), run with `nub run bench`. Not yet tracked in CI.
 - **Bundle-size guard** in CI.
 - **TypeScript 7 note:** TS 7 has no JS compiler API, so `vite-plugin-dts` does not work. Declarations are emitted with `tsc -p tsconfig.build.json` after the Vite build.
-- **Lightning CSS** or Vite's `?inline` CSS import to minify the stylesheet into a string (dev-only).
+- **CSS is generated from the registry at load time** as strings, so no CSS build tooling (Lightning CSS, `?inline`) is needed. The earlier plan to add Lightning CSS was dropped.
 
 ### Package manager
 - `nub` for installing, running scripts, and publishing. Contributors and CI use it; docs and scripts show `nub` commands only.
 
 ### Dependencies
 - Runtime: zero. Users install one package.
-- Dev-only: TypeScript, Vite, Vitest, a DOM test environment, Lightning CSS.
+- Dev-only: TypeScript, Vite, Vitest, happy-dom, Playwright (browser tests and PNG rendering), `@vitest/browser-playwright`, `gpt-tokenizer` (benchmark), `@types/node`.
+- Optional peer: `playwright`, only for `mokui render`.
+- Examples (`examples/vue`, `examples/react`) have their own dependencies and are not part of the package.
+
+## Architecture
+
+### Registry is the single source of truth (`src/registry.ts`)
+One `TagSpec` per primitive: attributes, closed value sets with their CSS, flags, which words may be bare, where quoted text goes, default ARIA role. Everything is derived from it:
+- the stylesheet per element (`src/css.ts`), including breakpoint variants
+- the custom elements (`src/elements/index.ts`)
+- the parser's bare-word resolution and validation (`src/dsl/parse.ts`)
+- the cheat sheet (`src/cheatsheet.ts`)
+
+Adding a primitive means adding one spec (plus a small renderer if it needs shadow content). Docs and validation cannot drift from the code.
+
+### Validation is strict
+Unknown tags, attributes and values are errors, all reported at once with line numbers and the valid options (`MkError`). Raw HTML with an invalid value is silently ignored by CSS, as usual.
+
+### Responsiveness
+- Auto-reflow first: `grid min=md` uses `auto-fit` / `minmax`, costing no extra tokens.
+- Escape hatch: `-sm|-md|-lg` variants (`cols=1 cols-md=3`, `dir-md=row`, `g-lg=xl`) on attributes marked responsive, mobile-first, generated as container queries. Breakpoints are 480 / 768 / 1024 px of the container.
+- Container queries (not media queries) because mocks live inside panes and shadow roots. `mount()` and `<mk-frame>` are the containers.
+- `frame mobile|tablet|desktop` previews a device width.
+
+### Recipes (`src/recipes.ts`)
+`card`, `navbar`, `tabs`, `list`, `table`, `tr` are DSL-level macros that expand to primitives before rendering. There are no recipe elements, no extra rendering path, and the DOM stays flat and readable. See constitution section 2.7.
+
+### Intent layer
+Every tag accepts `name` (`#name`), `role` and `note`. Controls get a default `role` attribute on the host (explicit `role` wins). `outline()` prints the canonical tree, an inventory of interactive elements and the notes, so an agent can match a mock against written requirements.
+
+### Entry points
+- `mokui`: registers elements, exports `mount` and the core API.
+- `mokui/core`: DOM-free (parse, compile, print, outline, cheatsheet), safe in Node. Verified by test to ship no elements or icons.
+- `mokui/vite`: `.mk` imports.
+- `mokui` CLI: `cheatsheet`, `outline`, `render` (PNG via the optional `playwright` peer, using an IIFE browser bundle).
 
 ## Revisit if
 - DSL benchmarks show no meaningful token savings over HTML.

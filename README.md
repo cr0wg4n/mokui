@@ -1,0 +1,36 @@
+# Mokui
+
+Framework-agnostic, token-cheap UI mocking for AI agents and humans. Draft layouts, spacing, type and icons in a tiny line-based DSL; render them as web components in any Vite project (Vue, React, Angular, Svelte, plain HTML).
+
+```
+stack g=lg p=lg
+  navbar "Acme"
+    icon bell
+  grid cols=1 cols-md=3 g=md
+    card "Visits"
+      text xl bold "1,204"
+  button primary "Save"
+```
+
+- **Cheap:** about 66% fewer tokens than the equivalent Tailwind HTML in our fixtures ([bench](./bench/README.md)).
+- **Closed vocabulary:** unknown tags, attributes and values are errors with line numbers.
+- **For agents:** generated cheat sheet, structural outline with notes, PNG render. See [docs/AGENTS.md](./docs/AGENTS.md).
+- **One dependency, zero runtime deps.**
+
+## Docs
+- [CONSTITUTION.md](./CONSTITUTION.md): principles
+- [TECH_DECISIONS.md](./TECH_DECISIONS.md): stack and architecture
+- [ROADMAP.md](./ROADMAP.md): task list and status
+- [docs/USAGE.md](./docs/USAGE.md): install, frameworks, theming, CLI
+- [docs/AGENTS.md](./docs/AGENTS.md): how an agent should use Mokui
+- [docs/TESTING.md](./docs/TESTING.md): test layers and coverage
+- [bench/README.md](./bench/README.md), [eval/README.md](./eval/README.md): measurements
+
+## Develop
+```
+nub install
+nub exec playwright install chromium
+nub run dev        # live playground
+nub run test       # unit, browser, e2e
+nub run bench      # token benchmark
+```

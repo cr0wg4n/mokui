@@ -8,6 +8,8 @@ Mokui is a **framework-agnostic, token-cheap way to mock UI**. It exists to *dra
 
 It is designed first for **AI agentic flows** (an agent drafting a UI in a handful of tokens) and second for humans. It must work the same regardless of whether the target app is Vue, React, Angular, Svelte, or plain HTML.
 
+A mock is a **communication artifact**: it sits next to written requirements and gives humans and agents a shared, concrete picture of what is needed. Requirements say *what and why*; the mock shows *shape and structure*. Neither is complete alone.
+
 ## 2. Core Principles
 
 ### 2.1 Token economy is a feature
@@ -37,6 +39,15 @@ It is designed first for **AI agentic flows** (an agent drafting a UI in a handf
 - Deterministic: the same input always yields the same output. No randomness, no hidden state, no network.
 - Constrained vocabulary beats open-ended vocabulary: a small, closed set of primitives, sizes, and tokens reduces hallucination and invalid output.
 
+### 2.6 Shared understanding: intent, not just looks
+- A mock must be readable by an agent as **structure**, not only as pixels. Every mock can be dumped as a compact outline (tree of elements, roles, names, notes) that an agent can match against written requirements.
+- Elements may carry optional intent: a `name`, a `role`, and a short `note` (e.g. `note="shown after login"`). Intent is optional and must never be required to render.
+- Agents get two views of the same mock: the rendered image and the structural outline. Both derive from one source, so they cannot disagree.
+
+### 2.7 Composites are recipes, not components
+- Common patterns (card, navbar, tabs, table, list) are important and supported, but as **recipes**: named compositions that expand into the same primitives. They add no new rendering path and no bespoke styling.
+- A recipe is only added when it measurably saves tokens or reduces agent errors in real mocks.
+
 ## 3. Design Rules
 
 ### 3.1 Small closed vocabulary
@@ -63,7 +74,7 @@ It is designed first for **AI agentic flows** (an agent drafting a UI in a handf
 ## 4. Non-Goals
 
 Mokui will not:
-- Become a full component library or design system.
+- Become a full component library or design system. Recipes (section 2.7) expand to primitives; they are not a component library.
 - Ship framework-specific component wrappers as a requirement.
 - Include a state manager, router, data layer, or business logic.
 - Require a build step beyond a standard Vite setup.
