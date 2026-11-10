@@ -1,0 +1,31 @@
+<div class="flex flex-col gap-4 p-4 w-96">
+  <div class="flex gap-3 items-center">
+    <div class="w-12 h-12 rounded-full border flex items-center justify-center">AM</div>
+    <div class="flex flex-col gap-1">
+      <h2 class="text-lg font-bold">Account</h2>
+      <p class="text-sm text-gray-500">Update your profile</p>
+    </div>
+  </div>
+  <label class="flex flex-col gap-1">Full name
+    <input class="border rounded p-2" placeholder="Ana Martin" />
+  </label>
+  <label class="flex flex-col gap-1">Email
+    <input type="email" class="border rounded p-2" placeholder="ana@x.io" />
+  </label>
+  <label class="flex flex-col gap-1">Role
+    <select class="border rounded p-2">
+      <option>Admin</option>
+      <option>Editor</option>
+      <option>Viewer</option>
+    </select>
+  </label>
+  <label class="flex flex-col gap-1">Bio
+    <textarea rows="4" class="border rounded p-2" placeholder="Tell us about you"></textarea>
+  </label>
+  <label class="flex items-center gap-2"><input type="checkbox" role="switch" checked /> Email notifications</label>
+  <label class="flex items-center gap-2"><input type="checkbox" /> Subscribe to newsletter</label>
+  <div class="flex gap-2 justify-end">
+    <button class="px-4 py-2">Cancel</button>
+    <button class="px-4 py-2 bg-black text-white rounded">Save</button>
+  </div>
+</div>
