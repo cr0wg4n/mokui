@@ -4,7 +4,7 @@ Task list for building Mokui. Check items off as they land (`- [x]`). Any deviat
 
 Status legend: `[x]` done and tested, `[ ]` not done.
 
-**Status: Steps 0-5 and 7-10 are done. Step 6 is done except running the accuracy eval against a real model.** 244 tests pass (unit, browser, e2e).
+**Status: Steps 0-5 and 7-11 are done. Step 6 is done except running the accuracy eval against a real model.** 302 tests pass (unit, browser, e2e).
 
 ## Step 0: Registry as single source of truth
 - [x] Primitive registry: one spec per tag (attributes, allowed values, CSS rules, bare-word mapping)
@@ -105,6 +105,15 @@ Status legend: `[x]` done and tested, `[ ]` not done.
 - [x] Overlays and misc: `popover`, `drawer` top/bottom, `fab`, `divider "label"`, `icon muted`, 40 more icons
 - [x] Tests (unit and real browser), docs, cheat sheet cost measured per pack
 
+## Step 11: Theming
+- [x] `accent` (named colors), `radius` and `font` attributes that combine with `theme` and survive nested themes
+- [x] `themeFromColor(color, { mode })`: a full theme (accent, text on accent, tinted neutrals) from one brand color
+- [x] `defineTheme(name, options)`: custom themes registered at runtime (parser, CSS and cheat sheet follow)
+- [x] Theme file (`.json`): `loadTheme`, `mokui theme <color>`, `render --theme-file`, `--accent` `--radius` `--font`
+- [x] `mount(..., { theme })` and `themeStyle` accept a name or options
+- [x] Playground theme editor (base, accent swatches and picker, radius, font, live JSON, copy) and the same controls in the Vue and React apps
+- [x] Tests and docs
+
 ## Notes
 Deviations from the plan and findings, recorded as work happened.
 
@@ -144,6 +153,15 @@ Deviations from the plan and findings, recorded as work happened.
 - **`icon` size is now a bare word** (`icon bell xl`).
 - **The eval's prompt set grew to 18** (three for the new elements) and loads every pack by default; `EVAL_PACKS=default` tests the cheaper sheet.
 - **Still a vocabulary, not production components:** placeholder data, no behavior beyond open / close / select. Charts have no axes values or tooltips; the calendar has no navigation.
+
+**Step 11 (theming)**
+- **Decision: a theme is data (tokens), not a template.** Templating would add logic the constitution excludes and give nothing tokens cannot. Four layers instead: attributes (`theme`, `accent`, `radius`, `font`), `themeFromColor`, `defineTheme` / theme files / CLI, and visual editors (playground, apps).
+- **Nested themes used to reset the accent.** A naive design makes `theme=dark` inside `accent=emerald` forget the emerald. Fixed structurally: accent, radius and font live in `--mk-u-*` variables that every theme reads first.
+- **Dark-mode accents needed a real guarantee.** The first `themeFromColor` lightened to a fixed level, which left indigo at about 4.5:1 only by luck; it now lightens until WCAG AA is met (tested on seven colors).
+- **Bug found through the playground, not the first tests:** `mount()` never removed the theme it applied earlier, so Reset left the old accent on screen. Fixed (it now clears what it applied) and covered.
+- **Requires `color-mix()` and `light-dark()`** (Chrome/Edge 123, Firefox 120, Safari 17.5). Documented as the browser baseline.
+- **`defineTheme` registers globally** and cannot redefine a name; fine for a vocabulary extension, awkward for hot-reloading a theme in a dev server. Not solved.
+- **Cost:** three more attributes took the default cheat sheet from 1,498 to 1,560 tokens.
 
 **Examples**
 - The Vue and React apps now mirror the playground: the same six screens (shared `examples/screens/*.mk`, imported with `?raw` by the playground and through the Vite plugin by the apps), a screen picker, theme and width controls, and a section where framework state drives plain `<mk-*>` tags. 244 tests, 27 of them end-to-end.

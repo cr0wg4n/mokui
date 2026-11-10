@@ -81,7 +81,8 @@ A mock is a **communication artifact**: it sits next to written requirements and
 ### 3.5 Modern, restrained, never final
 - The default look is modern and polished: soft neutrals, rounded corners, subtle elevation, clear type. A draft that looks good gets read and discussed.
 - It stays restrained: a single accent that defaults to near-black, no brand colors, no imagery, placeholder content. It must never be mistaken for a final design.
-- Look is controlled only through CSS custom properties and one `theme` attribute (`modern`, `dark`, `wire`). `wire` is the plain wireframe look for when fidelity should be low.
+- Look is controlled only through CSS custom properties and four attributes that combine freely: `theme` (`modern`, `dark`, `wire`, or a registered custom theme), `accent` (a named color), `radius` (`sharp`, `soft`, `round`) and `font` (`sans`, `serif`, `mono`). `wire` is the plain wireframe look for when fidelity should be low.
+- **A theme is data, never a template.** It is a set of design tokens, with no logic. A custom theme is defined from tokens, from a single brand color (`themeFromColor`), or from a theme file (`.json`), and the accent, radius and font a user picks always survive a nested theme.
 - Styles are isolated so mocks do not leak into, or get altered by, the host app's CSS.
 
 ## 4. Non-Goals

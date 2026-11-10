@@ -17,7 +17,7 @@ stack g=lg p=lg
 ```
 
 - **Cheap:** about 70% fewer tokens than the equivalent Tailwind HTML in our fixtures ([bench](./bench/README.md)).
-- **Modern by default:** soft neutrals, rounded corners, subtle elevation; `theme=dark` and `theme=wire` for other looks.
+- **Modern by default, easy to re-skin:** soft neutrals, rounded corners, subtle elevation. `theme=dark accent=indigo radius=round font=serif` on any element, a whole theme from one brand color (`mokui theme "#e11d48"`), or a theme file. A theme is data, not a template.
 - **Interactive drafts:** `button opens=#invite`, modals, drawers, sidebars, dropdowns, tabs. Declared, not programmed, and validated.
 - **Closed vocabulary, wide coverage:** 67 tags (layout, forms, overlays, charts, calendars, alerts, navigation...) in packs that cost tokens only when loaded. Unknown tags, attributes and values are errors with line numbers.
 - **For agents:** generated cheat sheet, structural outline with notes, PNG render. See [docs/AGENTS.md](./docs/AGENTS.md).

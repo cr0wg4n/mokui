@@ -30,7 +30,7 @@ import page from './login.mk'   // HTML string
 import { mount } from 'mokui'
 mount(document.getElementById('app')!, 'stack g=md\n  text xl "Hi"')
 ```
-`mount` makes the target a positioned CSS query container, so breakpoint attributes (`cols-md=3`) respond to its width and overlays cover it. Options: `mount(el, src, { theme: 'dark', open: ['invite'] })`.
+`mount` makes the target a positioned CSS query container, so breakpoint attributes (`cols-md=3`) respond to its width and overlays cover it. Options: `mount(el, src, { theme: 'dark', open: ['invite'] })` (`theme` also takes options, see Themes).
 
 ### Vue
 Tell Vue the tags are custom elements, then render the HTML or write the tags directly. See [examples/vue](../examples/vue) (six screens, theme and width controls, and Vue state driving `<mk-*>` tags).
@@ -129,10 +129,57 @@ nub exec mokui render mock.mk -o menu.png --open more --theme dark
 or `compile(src, { open: ['invite'] })` / `mount(el, src, { open: [...] })` in code.
 
 ## Themes
-`theme=modern` (default), `theme=dark`, `theme=wire` on any element applies to that whole subtree, so a dark panel can sit in a light page. `mount(el, src, { theme })` and `render --theme` theme the whole mock. `wire` is the plain wireframe look for low-fidelity drafts. Every look is made of CSS variables, listed below, so a host can also set them directly.
+A theme is **data**: a set of design tokens, with no logic. There are four ways to change the look, from simplest to most complete, and they combine.
+
+**1. Attributes, in the DSL (for agents and quick drafts).** On any element; the value applies to that whole subtree:
+```
+stack theme=dark accent=indigo radius=round font=serif
+  button primary "Save"
+```
+| Attribute | Values |
+|---|---|
+| `theme` | `modern` (default), `dark`, `wire` (plain wireframe), or a theme you registered |
+| `accent` | `zinc` `blue` `indigo` `violet` `pink` `rose` `red` `orange` `amber` `green` `emerald` `teal` `cyan` (the primary buttons, checked controls, progress, active tab, charts) |
+| `radius` | `sharp` (2px), `soft` (12px / 8px, default), `round` (20px / 12px) |
+| `font` | `sans` (default), `serif`, `mono` |
+
+Accent, radius and font are separate from the theme, so they **survive a nested theme**: a `dark` panel inside an `accent=emerald` page is dark and still emerald (a lighter emerald, so it reads on the dark surface). A nearer attribute wins.
+
+**2. From one brand color.** `themeFromColor` builds a full set of tokens: the accent, readable text on it, and neutral surfaces and text tinted with the color's hue. In dark mode the accent is lightened until it has at least 4.5:1 contrast with the surface.
+```ts
+import { defineTheme, themeFromColor } from 'mokui'
+defineTheme('brand', { tokens: themeFromColor('#e11d48') })
+defineTheme('brand-dark', { base: 'dark', tokens: themeFromColor('#e11d48', { mode: 'dark' }) })
+```
+```
+stack theme=brand
+```
+`defineTheme(name, { base, accent, radius, font, tokens })` registers a theme: elements that already exist pick up its CSS, the parser accepts the name, and the cheat sheet lists it.
+
+**3. From a theme file.** The same options as JSON. Generate one from a color, keep it in your repo, load it anywhere:
+```
+nub exec mokui theme "#e11d48" --name brand --mode dark > brand.json
+nub exec mokui render mock.mk -o out.png --theme-file brand.json
+nub exec mokui render mock.mk -o out.png --accent indigo --radius round --font serif
+nub exec mokui theme "#e11d48" --css            # :root { --mk-... } for your own stylesheet
+```
+```json
+{ "name": "brand", "base": "dark", "accent": "rose", "radius": "round", "font": "serif",
+  "tokens": { "bg": "#101010", "fg": "#fafafa" } }
+```
+`loadTheme(json)` validates a file and reports every problem at once (unknown key, token, accent, theme...). Any token in `tokens` overrides the base theme.
+
+**4. In code, for a whole mock or a whole page.**
+```ts
+mount(el, src, { theme: 'dark' })                                    // a name
+mount(el, src, { theme: { base: 'dark', accent: 'teal', radius: 'round' } })
+const style = themeStyle({ base: 'dark', accent: 'teal' })           // for v-bind:style / style={...}
+const css = themeCssText({ accent: 'teal' })                         // ':root{--mk-...}' for a stylesheet
+```
+Mounting again replaces the look: whatever the previous mount applied is removed first. See the theme controls in the [Vue](../examples/vue) and [React](../examples/react) apps, and the **theme editor** in the playground: pick a base, accent, radius and font, edit the live JSON, and copy it as JSON or CSS.
 
 ## Theming variables
-Override CSS custom properties anywhere above the mock. Scales:
+Everything above sets CSS custom properties; a host can also set them directly, anywhere above the mock. Scales:
 | Variables | Controls | Defaults |
 |---|---|---|
 | `--mk-s-none..xl` | gap, padding | 0, 4, 8, 12, 16, 24 px |
@@ -140,11 +187,13 @@ Override CSS custom properties anywhere above the mock. Scales:
 | `--mk-z-xs..xl` | `w` / `h` | 24, 48, 96, 160, 240 px |
 | `--mk-m-xs..xl` | `grid min=` | 80, 120, 200, 280, 400 px |
 | `--mk-fg`, `--mk-bg`, `--mk-muted`, `--mk-line`, `--mk-fill` | text, background, secondary text, borders, subtle fill | modern: `#18181b`, `#fff`, `#71717a`, `#e4e4e7`, `#f4f4f5` |
-| `--mk-accent`, `--mk-on-accent`, `--mk-danger` | primary buttons, checked states, active tab; text on accent; destructive | `#18181b`, `#fff`, `#dc2626` |
+| `--mk-accent`, `--mk-on-accent` | primary buttons, checked states, active tab; text on accent | `#18181b`, `#fff` |
+| `--mk-danger`, `--mk-success`, `--mk-warning`, `--mk-info` | status colors (alerts, badges, deltas, rating) | `#dc2626`, `#16a34a`, `#d97706`, `#2563eb` |
 | `--mk-r`, `--mk-r-sm` | radius for containers, for controls | 12px, 8px |
+| `--mk-font` | typeface | system sans |
 | `--mk-shadow`, `--mk-shadow-lg`, `--mk-backdrop` | cards and fields, overlays, modal backdrop | soft shadows, 45% black |
 
-The default accent is near-black on purpose: drafts should not look like a finished brand. Set `--mk-accent` (and `--mk-on-accent`) to try a color.
+To change an accent, radius or font from the outside, set `--mk-u-accent` (with `--mk-u-on-accent`), `--mk-u-r` and `--mk-u-r-sm`, or `--mk-u-font`: every theme reads these first, which is what lets them survive nested themes. The default accent is near-black on purpose: drafts should not look like a finished brand.
 
 ## CLI
 ```
@@ -155,4 +204,4 @@ nub exec mokui render mock.mk -o mock.png -w 600 [--open name,name] [--theme dar
 Reads stdin when the file is `-`. Errors print with line numbers and exit 1.
 
 ## Browser support
-Evergreen browsers only: constructable stylesheets, container queries and shadow DOM are required.
+Evergreen browsers only: constructable stylesheets, container queries, shadow DOM, `color-mix()` and `light-dark()` are required (Chrome and Edge 123+, Firefox 120+, Safari 17.5+).

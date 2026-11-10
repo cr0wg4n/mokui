@@ -66,6 +66,13 @@ Change only the lines that need changing. The format is line-based, so edits are
 ## Fidelity
 The default look is modern and polished, which makes drafts pleasant to review. For an early, structure-only conversation use `theme=wire` (plain boxes, no shadows) so nobody mistakes the draft for a design. `theme=dark` checks the same screen in a dark UI.
 
+To match a brand, do not hand-write colors: pick an accent (`accent=indigo`), or generate a theme from the brand color and use it by name:
+```
+nub exec mokui theme "#e11d48" --name brand > brand.json
+nub exec mokui render mock.mk -o out.png --theme-file brand.json
+```
+`accent`, `radius` and `font` combine with any theme and survive nested themes, so `stack theme=dark accent=emerald radius=round` is one line. Invalid values are errors that list the valid ones.
+
 ## Conventions
 - One mock per screen. Use `frame mobile|tablet|desktop` to show a device width.
 - Use `//` comment lines for requirement context. They are ignored by the parser.

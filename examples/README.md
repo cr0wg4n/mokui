@@ -9,7 +9,7 @@ The same six screens in three places: the playground, a Vue app and a React app.
 | `react/` | The same app in React 19, using `dangerouslySetInnerHTML`. |
 | `../playground/` | The live editor. It imports the same files with `?raw` so you can edit the DSL. |
 
-Each app has a toolbar to pick the screen, the theme (`modern`, `dark`, `wire`) and the container width. Everything on the screens is clickable (modals, drawers, sidebar, dropdowns, popovers, tabs, collapse, toast), because one document-level listener handles the declared interactions inside markup injected by the framework.
+Each app has a toolbar to pick the screen, the theme (`modern`, `dark`, `wire`), the accent (13 colors), the radius, the font and the container width. The playground has a full **theme editor** instead: base, accent swatches and a free color, radius, font, an option to tint surfaces from the accent, and a live JSON theme file you can edit, copy as JSON or as CSS, and reload (it is saved in `localStorage`). Everything on the screens is clickable (modals, drawers, sidebar, dropdowns, popovers, tabs, collapse, toast), because one document-level listener handles the declared interactions inside markup injected by the framework.
 
 Under the screen there is a section that Mokui cannot show on its own: **framework state driving Mokui elements**. Plain `<mk-*>` tags are written in the framework's template, bound to framework state (a range input sets `value` on `<mk-progress>` and `<mk-rating>`, a click handler on `<mk-button>` increments a counter, clicking a `<mk-chip>` removes it from an array).
 
