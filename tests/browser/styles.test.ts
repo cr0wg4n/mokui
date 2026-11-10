@@ -36,9 +36,12 @@ describe('layout primitives (real browser)', () => {
     expect(css(row).alignItems).toBe('center')
     expect(css(row).justifyContent).toBe('space-between')
   })
-  it('unknown scale value changes nothing', () => {
-    const row = render('row g=huge').querySelector('mk-row')!
-    expect(css(row).gap).toBe('normal')
+  it('unknown scale value in raw HTML changes nothing; the DSL rejects it loudly', () => {
+    host = document.createElement('div')
+    document.body.append(host)
+    host.innerHTML = '<mk-row g="huge"></mk-row>'
+    expect(css(host.querySelector('mk-row')!).gap).toBe('normal')
+    expect(() => mount(host, 'row g=huge')).toThrow('Valid: none xs sm md lg xl')
   })
 })
 

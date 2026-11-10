@@ -23,14 +23,19 @@
     "./vite": {
       "types": "./dist/vite-plugin.d.ts",
       "import": "./dist/vite-plugin.js"
+    },
+    "./core": {
+      "types": "./dist/core.d.ts",
+      "import": "./dist/core.js"
     }
   },
   "scripts": {
     "dev": "vite playground -c vite.config.ts",
-    "build": "vite build && tsc -p tsconfig.build.json",
+    "build": "vite build && vite build -c vite.browser.config.ts && tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "bench": "nub bench/run.ts"
+    "bench": "nub bench/run.ts",
+    "eval": "nub eval/run.ts"
   },
   "devDependencies": {
     "@types/node": "^26.6.6",
@@ -47,6 +52,17 @@
       "name": "nub",
       "version": "^0.10.0",
       "onFail": "ignore"
+    }
+  },
+  "bin": {
+    "mokui": "./dist/cli.js"
+  },
+  "peerDependencies": {
+    "playwright": ">=1.40"
+  },
+  "peerDependenciesMeta": {
+    "playwright": {
+      "optional": true
     }
   }
 }

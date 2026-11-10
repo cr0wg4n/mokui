@@ -1,13 +1,13 @@
 import type { Plugin } from 'vite'
-import { parse, toHTML } from './dsl/parse'
+import { html } from './dsl/compile'
 
-/** Import `.mk` files as HTML strings: `import html from './page.mk'`. */
+/** Import `.mk` files as HTML strings: `import page from './page.mk'`. */
 export function mokui(): Plugin {
   return {
     name: 'mokui',
     transform(code, id) {
       if (!id.endsWith('.mk')) return
-      return { code: `export default ${JSON.stringify(toHTML(parse(code)))}`, map: null }
+      return { code: `export default ${JSON.stringify(html(code))}`, map: null }
     },
   }
 }

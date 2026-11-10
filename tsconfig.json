@@ -10,7 +10,8 @@
     "skipLibCheck": true,
     "verbatimModuleSyntax": true,
     "types": ["vite/client", "node"],
+    "resolveJsonModule": true,
     "paths": { "mokui": ["./src/index.ts"] }
   },
-  "include": ["src", "tests", "playground", "bench/run.ts", "vite.config.ts"]
+  "include": ["src", "tests", "playground", "bench/run.ts", "eval", "vite.config.ts", "vite.browser.config.ts"]
 }
