@@ -6,7 +6,7 @@ import { outline } from './outline'
 import { renderPng } from './render-png'
 
 const usage = `mokui <command>
-  cheatsheet                       print the DSL reference for agents
+  cheatsheet [pack...|all]         print the DSL reference for agents (default: core overlay;\n                                   other packs: forms feedback data nav)
   outline <file|->                 print the structural view (tree, interactive elements, notes)
   render <file|-> -o out.png [-w 600] [--open a,b] [--theme dark|wire]\n                                   render a PNG (needs optional playwright); --open draws those\n                                   modals/drawers/dropdowns open`
 
@@ -18,7 +18,7 @@ const flag = (f: string, short: string) => {
 const read = (p: string | undefined) => readFileSync(!p || p === '-' ? 0 : p, 'utf8')
 
 try {
-  if (cmd === 'cheatsheet') console.log(cheatsheet())
+  if (cmd === 'cheatsheet') console.log(cheatsheet({ packs: rest.length === 0 ? undefined : rest[0] === 'all' ? 'all' : rest }))
   else if (cmd === 'outline') console.log(outline(read(rest[0])))
   else if (cmd === 'render') {
     const out = flag('--out', '-o')

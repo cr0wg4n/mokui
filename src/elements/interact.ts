@@ -2,6 +2,8 @@ import { primitives } from '../specs'
 
 const stateful = new Map(primitives.filter((s) => s.stateful).map((s) => [`mk-${s.tag}`, s]))
 const OVERLAYS = 'mk-modal[open],mk-drawer[open]'
+const FLOATING = 'mk-dropdown[open],mk-popover[open]'
+const isFloating = (n: Element) => n.localName === 'mk-dropdown' || n.localName === 'mk-popover'
 
 /** Is this stateful element currently open? (sidebar is open unless `closed`.) */
 export function isOpen(el: Element): boolean {
@@ -18,7 +20,7 @@ const find = (from: Element, name: string) =>
   (from.getRootNode() as Document | ShadowRoot).querySelector<HTMLElement>(`[name="${CSS.escape(name)}"]`)
 
 const enclosing = (el: Element): Element | null => {
-  for (let p = el.parentElement; p; p = p.parentElement) if (stateful.has(p.localName) && p.localName !== 'mk-dropdown') return p
+  for (let p = el.parentElement; p; p = p.parentElement) if (stateful.has(p.localName)) return p
   return null
 }
 
@@ -46,16 +48,17 @@ function onClick(e: MouseEvent) {
   const path = e.composedPath()
   const els = path.filter((n): n is HTMLElement => n instanceof HTMLElement)
 
-  // dropdown: trigger toggles, item closes, clicks elsewhere close
-  const dd = els.find((n) => n.localName === 'mk-dropdown')
+  // dropdown / popover: the first child is the trigger and toggles; the rest is the panel.
+  // An item click closes it; clicks elsewhere close it.
+  const dd = els.find(isFloating)
   if (dd) {
-    const inMenu = els.some((n) => n.localName === 'mk-menu' && dd.contains(n))
-    if (!inMenu) dd.toggleAttribute('open')
+    const inPanel = els.some((n) => n.parentElement === dd && n !== dd.firstElementChild)
+    if (!inPanel) dd.toggleAttribute('open')
     else if (els.some((n) => n.localName === 'mk-item')) dd.removeAttribute('open')
   }
   const roots: (Document | ShadowRoot)[] = [document, ...path.filter((n): n is ShadowRoot => n instanceof ShadowRoot)]
   for (const root of roots) {
-    root.querySelectorAll('mk-dropdown[open]').forEach((d) => d !== dd && d.removeAttribute('open'))
+    root.querySelectorAll(FLOATING).forEach((d) => d !== dd && d.removeAttribute('open'))
   }
 
   // declared interactions: the innermost element that has one wins
@@ -70,7 +73,7 @@ function onKey(e: KeyboardEvent) {
   if (e.key !== 'Escape') return
   const open = document.querySelectorAll(OVERLAYS)
   open[open.length - 1]?.removeAttribute('open')
-  document.querySelectorAll('mk-dropdown[open]').forEach((d) => d.removeAttribute('open'))
+  document.querySelectorAll(FLOATING).forEach((d) => d.removeAttribute('open'))
 }
 
 let installed = false

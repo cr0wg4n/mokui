@@ -65,6 +65,7 @@ export const A = {
   justify: { doc: 'main-axis distribution', rules: decl('justify-content', { start: 'flex-start', center: 'center', end: 'flex-end', between: 'space-between' }) },
   wrap: { doc: 'allow wrapping', flag: 'flex-wrap:wrap' },
   grow: { doc: 'take remaining space', flag: 'flex:1 1 0;min-width:0' },
+  bottom: { doc: 'push to the bottom edge of a column or frame', flag: 'margin-top:auto' },
   dir: { doc: 'direction (switch layout at a breakpoint)', responsive: true, rules: { row: 'flex-direction:row', col: 'flex-direction:column' } },
   w: { doc: 'width', responsive: true, rules: { ...rulesFrom(scale.size, 'width', 'z'), full: 'width:100%' } },
   h: { doc: 'height', rules: { ...rulesFrom(scale.size, 'height', 'z'), full: 'height:100%' } },
@@ -91,10 +92,12 @@ const flex = 'display:flex;'
 const colRules = (n: number) =>
   Object.fromEntries(Array.from({ length: n }, (_, i) => [String(i + 1), `grid-template-columns:repeat(${i + 1},minmax(0,1fr))`]))
 const line = `1px solid ${v('line')}`
+const tone = (t: 'success' | 'warning' | 'danger' | 'info') =>
+  `background:color-mix(in srgb,${v(t)} 12%,${v('bg')});color:${v(t)};border-color:color-mix(in srgb,${v(t)} 35%,${v('line')})`
 
 // ---------- layout ----------
 
-const layoutAttrs = { g: A.g, p: A.p, align: A.align, justify: A.justify, wrap: A.wrap, grow: A.grow, dir: A.dir, w: A.w, h: A.h }
+const layoutAttrs = { g: A.g, p: A.p, align: A.align, justify: A.justify, wrap: A.wrap, grow: A.grow, bottom: A.bottom, dir: A.dir, w: A.w, h: A.h }
 
 const layout: TagSpec[] = [
   { tag: 'stack', doc: 'vertical flex container', css: `${flex}flex-direction:column`, attrs: layoutAttrs },
@@ -129,19 +132,23 @@ const layout: TagSpec[] = [
     tag: 'divider',
     doc: 'thin line',
     role: 'separator',
+    text: 'label',
     css: `align-self:stretch;height:1px;background:${v('line')};flex:none`,
     attrs: {
+      label: { doc: 'text in the middle of the line', free: true },
       vertical: { doc: 'vertical line', flag: 'width:1px;height:auto' },
       accent: { doc: 'thick accent line (active indicator)', flag: `height:2px;background:${v('accent')}` },
+      grow: A.grow,
     },
+    extra: `.l,.t{display:none}:host([label]){display:flex;align-items:center;gap:12px;height:auto;background:none;color:${v('muted')};font-size:var(--mk-f-sm,13px)}:host([label]) .l{display:block;flex:1;height:1px;background:${v('line')}}:host([label]) .t{display:block}`,
   },
   { tag: 'scroll', doc: 'scrollable region; set h', css: 'display:block;overflow:auto', attrs: { h: A.h, w: A.w, p: A.p, grow: A.grow } },
   {
     tag: 'frame',
     doc: 'device-width preview; also the query container for breakpoints',
-    css: `display:block;position:relative;container-type:inline-size;width:100%;margin-inline:auto;border:${line};border-radius:${v('r')};box-shadow:${v('shadow')};overflow:auto;background:${v('bg')}`,
+    css: `display:flex;flex-direction:column;position:relative;container-type:inline-size;width:100%;margin-inline:auto;border:${line};border-radius:${v('r')};box-shadow:${v('shadow')};overflow:auto;background:${v('bg')}`,
     attrs: {
-      device: { doc: 'preview width', bare: true, rules: { mobile: 'max-width:375px', tablet: 'max-width:768px', desktop: 'max-width:1280px' } },
+      device: { doc: 'preview width', bare: true, rules: { mobile: 'max-width:375px;min-height:640px', tablet: 'max-width:768px;min-height:520px', desktop: 'max-width:1280px' } },
     },
   },
 ]
@@ -163,10 +170,17 @@ const content: TagSpec[] = [
     },
   },
   {
+    tag: 'link',
+    doc: 'inline link; quoted string is the text',
+    role: 'link',
+    css: `display:inline;color:${v('fg')};text-decoration:underline;text-decoration-color:${v('muted')};text-underline-offset:3px;font-size:var(--mk-f-md,15px)`,
+    attrs: { s: sFont, muted: { doc: 'secondary color', flag: `color:${v('muted')}` } },
+  },
+  {
     tag: 'icon',
     doc: 'Lucide-named icon; first bare word is the name',
     css: 'display:inline-flex;width:1.5em;height:1.5em;flex:none',
-    attrs: { n: { doc: 'icon name', free: true, bare: true, required: true }, s: A.s },
+    attrs: { n: { doc: 'icon name', free: true, bare: true, required: true }, s: sFont, muted: { doc: 'secondary color', flag: `color:${v('muted')}` } },
     extra: 'svg{width:100%;height:100%}',
   },
   {
@@ -195,7 +209,19 @@ const content: TagSpec[] = [
     tag: 'badge',
     doc: 'small pill label; quoted string is the content',
     css: `display:inline-flex;align-items:center;width:fit-content;padding:2px 10px;border-radius:999px;border:${line};background:${v('fill')};font-size:var(--mk-f-xs,11px);font-weight:600;letter-spacing:.01em`,
-    attrs: { variant: { doc: 'style', bare: true, rules: { primary: `background:${v('accent')};color:${v('on-accent')};border-color:${v('accent')}` } } },
+    attrs: {
+      variant: {
+        doc: 'style',
+        bare: true,
+        rules: {
+          primary: `background:${v('accent')};color:${v('on-accent')};border-color:${v('accent')}`,
+          success: tone('success'),
+          warning: tone('warning'),
+          error: tone('danger'),
+          info: tone('info'),
+        },
+      },
+    },
   },
 ]
 
@@ -208,7 +234,8 @@ const fieldCss =
   `.label{font-size:var(--mk-f-sm,13px);font-weight:500;color:${v('fg')}}` +
   `.field{display:flex;align-items:center;gap:8px;min-height:40px;padding:8px 12px;border:${line};border-radius:${v('r-sm')};background:${v('bg')};box-shadow:${v('shadow')}}` +
   `.field .ico{display:inline-flex;width:1.2em;height:1.2em;color:${v('muted')}}.field .ico svg{width:100%;height:100%}` +
-  `.val{flex:1;color:${v('fg')}}.ph{flex:1;color:${v('muted')}}`
+  `.val{flex:1;color:${v('fg')}}.ph{flex:1;color:${v('muted')}}` +
+  `.msg{font-size:var(--mk-f-sm,13px);color:${v('muted')}}.msg:empty{display:none}.msg.err{color:${v('danger')}}.field.err{border-color:${v('danger')}}`
 const checkBox = `display:inline-block;width:16px;height:16px;border:1px solid ${v('muted')};background:${v('bg')};flex:none;position:relative`
 const choice = 'display:inline-flex;align-items:center;gap:8px;font-size:var(--mk-f-md,15px)'
 
@@ -240,6 +267,7 @@ const controls: TagSpec[] = [
       },
       icon: { doc: 'leading icon name', free: true },
       full: { doc: 'full width', flag: 'width:100%' },
+      fab: { doc: 'floating round button in the bottom-right corner of the container', flag: `position:absolute;right:16px;bottom:16px;z-index:30;width:56px;height:56px;padding:0;border-radius:50%;background:${v('accent')};color:${v('on-accent')};border-color:${v('accent')};box-shadow:${v('shadow-lg')}` },
       disabled: dis,
     },
     extra: `.ico{display:inline-flex;width:1.2em;height:1.2em}.ico svg{width:100%;height:100%}:host(:hover){filter:brightness(.97)}`,
@@ -255,6 +283,8 @@ const controls: TagSpec[] = [
       label: lbl,
       ph: { doc: 'placeholder', free: true },
       value: { doc: 'filled value', free: true },
+      help: { doc: 'helper text under the field', free: true },
+      error: { doc: 'error text under the field (red border)', free: true },
       w: A.w,
       disabled: dis,
     },
@@ -271,6 +301,8 @@ const controls: TagSpec[] = [
       ph: { doc: 'placeholder', free: true },
       value: { doc: 'filled value', free: true },
       rows: { doc: 'height in lines 2-8', bare: true, rules: Object.fromEntries([2, 3, 4, 5, 6, 8].map((n) => [String(n), `--mk-rows:${n}`])) },
+      help: { doc: 'helper text under the field', free: true },
+      error: { doc: 'error text under the field (red border)', free: true },
       w: A.w,
       disabled: dis,
     },
@@ -287,6 +319,8 @@ const controls: TagSpec[] = [
       opts: { doc: 'options separated by |', free: true },
       value: { doc: 'selected value (default first option)', free: true },
       open: { doc: 'show the option list', flag: '' },
+      help: { doc: 'helper text under the field', free: true },
+      error: { doc: 'error text under the field (red border)', free: true },
       w: A.w,
       disabled: dis,
     },

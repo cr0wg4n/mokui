@@ -3,7 +3,7 @@ import { parse, type MkNode } from './dsl/parse'
 import { print } from './dsl/print'
 import { specs } from './specs'
 
-const INTERACTIVE = ['button', 'input', 'textarea', 'select', 'checkbox', 'radio', 'switch', 'slider', 'tabs', 'collapse', 'dropdown']
+const INTERACTIVE = ['button', 'input', 'textarea', 'select', 'checkbox', 'radio', 'switch', 'slider', 'tabs', 'collapse', 'dropdown', 'popover', 'segmented', 'upload', 'otp']
 
 function walk(nodes: MkNode[], fn: (n: MkNode) => void) {
   for (const n of nodes) {

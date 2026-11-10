@@ -37,6 +37,17 @@ describe('breakpoints (container queries, mobile-first)', () => {
     expect(rect(f.querySelector('mk-frame')!).width).toBeLessThanOrEqual(375)
     expect(tracks(f.querySelector('mk-grid')!)).toHaveLength(1)
   })
+  it('device frames have a screen-like minimum height so bottom bars and fabs sit at the bottom', () => {
+    expect(rect(render('frame mobile', 800).querySelector('mk-frame')!).height).toBeGreaterThanOrEqual(640)
+    const r = render('frame mobile\n  stack\n    text "x"\n  button fab icon=plus', 800)
+    expect(rect(r.querySelector('mk-button')!).bottom).toBeGreaterThan(rect(r.querySelector('mk-frame')!).bottom - 20)
+  })
+  it('bottom pushes a bar to the bottom of a frame; tabbar does it by default', () => {
+    const r = render('frame mobile\n  stack p=md\n    text "content"\n  tabbar "home|user"', 600)
+    const bar = rect(r.querySelector('mk-stack > mk-divider')!.parentElement!)
+    expect(bar.bottom).toBeCloseTo(rect(r.querySelector('mk-frame')!).bottom - 1, -1)
+    expect(bar.top).toBeGreaterThan(400)
+  })
   it('frame widths', () => {
     expect(rect(render('frame tablet', 1400).querySelector('mk-frame')!).width).toBeCloseTo(768, 0)
     expect(rect(render('frame desktop', 1400).querySelector('mk-frame')!).width).toBeCloseTo(1280, 0)

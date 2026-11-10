@@ -11,6 +11,11 @@ const carry = (a: Record<string, string>) =>
 const items = (s: string | undefined) => (s ? s.split('|').map((x) => x.trim()) : [])
 
 const sp = { g: A.g, p: A.p }
+const parts = (s: string | undefined) => (s ? s.split(':').map((x) => x.trim()) : [])
+const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
+const num = (xs: number[]) => Object.fromEntries(xs.map((x) => [String(x), '']))
+const txt = (t: string, a: Record<string, string> = {}) => n('text', a, [], t)
+const free = (doc: string, bare = false) => ({ doc, free: true as const, bare })
 
 export const recipes: TagSpec[] = [
   {
@@ -81,6 +86,201 @@ export const recipes: TagSpec[] = [
           n('divider'),
           ...body,
         ]),
+      ]
+    },
+  },
+  {
+    tag: 'breadcrumb',
+    doc: 'path; quoted "Home|Projects|Settings"',
+    attrs: {},
+    expand: (node) => {
+      const xs = items(node.text)
+      return [
+        n('row', { g: 'sm', align: 'center', ...carry(node.attrs) },
+          xs.flatMap((t, i) => [
+            ...(i ? [n('icon', { n: 'chevron-right', s: 'xs', muted: '' })] : []),
+            txt(t, { s: 'sm', ...(i === xs.length - 1 ? { bold: '' } : { muted: '' }) }),
+          ])),
+      ]
+    },
+  },
+  {
+    tag: 'pagination',
+    doc: 'page buttons; quoted "1|2|3|10"; active=N',
+    attrs: { active: free('current page') },
+    expand: (node) => {
+      const cur = node.attrs.active ?? '1'
+      const btn = (a: Record<string, string>, label?: string) => n('button', { s: 'sm', ...a }, [], label)
+      return [
+        n('row', { g: 'xs', align: 'center', ...carry(node.attrs) }, [
+          btn({ variant: 'ghost', icon: 'chevron-left' }),
+          ...items(node.text).map((t) => (t === '…' || t === '...' ? txt('…', { muted: '' }) : btn({ variant: t === cur ? 'primary' : 'ghost' }, t))),
+          btn({ variant: 'ghost', icon: 'chevron-right' }),
+        ]),
+      ]
+    },
+  },
+  {
+    tag: 'steps',
+    doc: 'progress steps; quoted "Account|Plan|Confirm"; active=N (1-based)',
+    attrs: { active: free('current step') },
+    expand: (node) => {
+      const act = Number(node.attrs.active ?? 1)
+      const xs = items(node.text)
+      return [
+        n('row', { g: 'sm', align: 'center', ...carry(node.attrs) },
+          xs.flatMap((t, i) => [
+            ...(i ? [n('divider', { grow: '' })] : []),
+            n('row', { g: 'sm', align: 'center' }, [
+              n('badge', i + 1 <= act ? { variant: 'primary' } : {}, [], i + 1 < act ? '✓' : String(i + 1)),
+              txt(t, i + 1 === act ? { bold: '' } : { muted: '' }),
+            ]),
+          ])),
+      ]
+    },
+  },
+  {
+    tag: 'tabbar',
+    doc: 'mobile bottom bar; quoted "home|search|bell:Alerts|user"; active=N',
+    attrs: { active: free('selected item') },
+    expand: (node) => {
+      const act = Number(node.attrs.active ?? 1)
+      return [
+        n('stack', { g: 'none', bottom: '', ...carry(node.attrs) }, [
+          n('divider'),
+          n('row', { justify: 'between', p: 'sm' },
+            items(node.text).map((it, i) => {
+              const [icon, label] = parts(it) as [string, string | undefined]
+              return n('stack', { g: 'xs', align: 'center', grow: '' }, [
+                n('icon', i + 1 === act ? { n: icon } : { n: icon, muted: '' }),
+                txt(label ?? cap(icon), { s: 'xs', ...(i + 1 === act ? { bold: '' } : { muted: '' }) }),
+              ])
+            })),
+        ]),
+      ]
+    },
+  },
+  {
+    tag: 'toolbar',
+    doc: 'row of actions on a subtle bar; children go inside',
+    attrs: { w: A.w },
+    expand: (node) => [n('box', { dir: 'row', align: 'center', g: 'sm', p: 'sm', fill: '', ...carry(node.attrs) }, node.children)],
+  },
+  {
+    tag: 'command',
+    doc: 'command palette (a modal); quoted "Placeholder|Item|Item"; open with opens=#name',
+    stateful: true,
+    attrs: {},
+    expand: (node) => {
+      const [ph, ...rest] = items(node.text)
+      return [
+        n('modal', { size: 'md', ...carry(node.attrs) }, [
+          n('input', { type: 'search', ph: ph ?? 'Type a command' }),
+          n('stack', { g: 'none' }, rest.map((t) => n('item', {}, [], t))),
+        ]),
+      ]
+    },
+  },
+  {
+    tag: 'hero',
+    doc: 'page hero; quoted string is the headline; sub="..." subtitle; children are actions',
+    attrs: { sub: free('subtitle') },
+    expand: (node) => [
+      n('stack', { g: 'md', p: 'xl', align: 'center', ...carry(node.attrs) }, [
+        txt(node.text ?? '', { s: 'xl', bold: '', center: '' }),
+        ...(node.attrs.sub ? [txt(node.attrs.sub, { muted: '', center: '' })] : []),
+        ...(node.children.length ? [n('row', { g: 'sm', justify: 'center', wrap: '' }, node.children)] : []),
+      ]),
+    ],
+  },
+  {
+    tag: 'footer',
+    doc: 'page footer; quoted "Acme Inc|Privacy|Terms": first on the left, rest on the right',
+    attrs: {},
+    expand: (node) => {
+      const [first, ...rest] = items(node.text)
+      return [
+        n('stack', { g: 'none', ...carry(node.attrs) }, [
+          n('divider'),
+          n('row', { justify: 'between', align: 'center', p: 'md', wrap: '' }, [
+            txt(first ?? '', { s: 'sm', muted: '' }),
+            n('row', { g: 'lg' }, rest.map((t) => txt(t, { s: 'sm', muted: '' }))),
+          ]),
+        ]),
+      ]
+    },
+  },
+  {
+    tag: 'stat',
+    doc: 'metric card; quoted string is the label; value="1,204" delta="+12%"',
+    attrs: { value: free('the number'), delta: free('change, e.g. +12%'), w: A.w },
+    expand: (node) => {
+      const d = node.attrs.delta
+      return [
+        n('box', { p: 'md', g: 'xs', raised: '', ...carry(node.attrs) }, [
+          txt(node.text ?? '', { s: 'sm', muted: '' }),
+          n('row', { g: 'sm', align: 'center' }, [
+            txt(node.attrs.value ?? '', { s: 'xl', bold: '' }),
+            ...(d ? [n('badge', d.startsWith('+') ? { variant: 'success' } : d.startsWith('-') ? { variant: 'error' } : {}, [], d)] : []),
+          ]),
+        ]),
+      ]
+    },
+  },
+  {
+    tag: 'empty',
+    doc: 'empty state; quoted string is the title; sub="..." icon=name; children are actions',
+    attrs: { sub: free('explanation'), icon: free('icon name') },
+    expand: (node) => [
+      n('stack', { g: 'sm', align: 'center', p: 'xl', ...carry(node.attrs) }, [
+        n('icon', { n: node.attrs.icon ?? 'inbox', s: 'xl', muted: '' }),
+        txt(node.text ?? '', { bold: '', center: '' }),
+        ...(node.attrs.sub ? [txt(node.attrs.sub, { s: 'sm', muted: '', center: '' })] : []),
+        ...node.children,
+      ]),
+    ],
+  },
+  {
+    tag: 'timeline',
+    doc: 'vertical steps; quoted "Created:Mar 3|Reviewed|Shipped"; active=N steps done',
+    attrs: { active: free('steps completed') },
+    expand: (node) => {
+      const done = Number(node.attrs.active ?? 0)
+      return [
+        n('stack', { g: 'md', ...carry(node.attrs) },
+          items(node.text).map((it, i) => {
+            const [label, sub] = parts(it) as [string, string | undefined]
+            return n('row', { g: 'md', align: 'center' }, [
+              n('icon', i < done ? { n: 'circle-check' } : { n: 'circle', muted: '' }),
+              n('stack', { g: 'none' }, [txt(label, i < done ? { bold: '' } : { muted: '' }), ...(sub ? [txt(sub, { s: 'sm', muted: '' })] : [])]),
+            ])
+          })),
+      ]
+    },
+  },
+  {
+    tag: 'radios',
+    doc: 'radio group; quoted "A|B|C"; value=B (text or 1-based number); inline for a row',
+    attrs: { value: free('selected option'), inline: { doc: 'lay out in a row', flag: '' }, g: A.g },
+    expand: (node) => {
+      const xs = items(node.text)
+      const v = node.attrs.value
+      return [
+        n(node.attrs.inline !== undefined ? 'row' : 'stack', { g: node.attrs.g ?? (node.attrs.inline !== undefined ? 'lg' : 'sm'), ...carry(node.attrs) },
+          xs.map((t, i) => n('radio', v === t || v === String(i + 1) ? { checked: '' } : {}, [], t))),
+      ]
+    },
+  },
+  {
+    tag: 'checkboxes',
+    doc: 'checkbox group; quoted "A|B|C"; checked="1,3" (numbers or texts); inline for a row',
+    attrs: { checked: free('checked options, comma-separated'), inline: { doc: 'lay out in a row', flag: '' }, g: A.g },
+    expand: (node) => {
+      const xs = items(node.text)
+      const on = (node.attrs.checked ?? '').split(',').map((x) => x.trim()).filter(Boolean)
+      return [
+        n(node.attrs.inline !== undefined ? 'row' : 'stack', { g: node.attrs.g ?? (node.attrs.inline !== undefined ? 'lg' : 'sm'), ...carry(node.attrs) },
+          xs.map((t, i) => n('checkbox', on.includes(t) || on.includes(String(i + 1)) ? { checked: '' } : {}, [], t))),
       ]
     },
   },

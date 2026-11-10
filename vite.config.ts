@@ -7,6 +7,7 @@ const src = (p: string) => fileURLToPath(new URL(p, import.meta.url))
 export default defineConfig({
   
   resolve: { alias: { mokui: src('./src/index.ts') } },
+  server: { fs: { allow: [src('./')] } },
   build: {
     lib: {
       entry: {

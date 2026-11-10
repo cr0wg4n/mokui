@@ -1,7 +1,7 @@
 import { specs } from '../specs'
 import type { MkNode } from './parse'
 
-const q = (s: string) => `"${s.replace(/"/g, '\\"')}"`
+const q = (s: string) => `"${s.replace(/"/g, '\\"').replace(/\n/g, '\\n')}"`
 const val = (v: string) => (/^[^\s"]+$/.test(v) ? v : q(v))
 
 /** Canonical DSL for a node tree (stable, round-trips through parse). */

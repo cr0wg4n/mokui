@@ -35,12 +35,21 @@ export const interactive: TagSpec[] = [
     overlay: true,
     css: `display:none;position:absolute;inset:0;z-index:50;overflow:hidden;align-items:stretch;justify-content:flex-end;background:${v('backdrop')}`,
     attrs: {
-      side: { doc: 'which edge', bare: true, rules: { left: 'justify-content:flex-start', right: 'justify-content:flex-end' } },
+      side: {
+        doc: 'which edge',
+        bare: true,
+        rules: {
+          left: 'justify-content:flex-start',
+          right: 'justify-content:flex-end',
+          top: 'flex-direction:column;justify-content:flex-start;align-items:stretch',
+          bottom: 'flex-direction:column;justify-content:flex-end;align-items:stretch',
+        },
+      },
       label: { doc: 'drawer title', free: true },
       w: A.w,
       open: openFlag('display:flex'),
     },
-    extra: overlayPanel + `.panel{width:min(var(--mk-drawer-w,340px),85%);max-height:none;border-radius:0;border-width:0 0 0 1px}:host([side="left"]) .panel{border-width:0 1px 0 0}`,
+    extra: overlayPanel + `:host([side="top"]) .panel,:host([side="bottom"]) .panel{width:auto;max-height:70%;border-width:1px 0 0 0;border-radius:16px 16px 0 0}:host([side="top"]) .panel{border-width:0 0 1px 0;border-radius:0 0 16px 16px}.panel{width:min(var(--mk-drawer-w,340px),85%);max-height:none;border-radius:0;border-width:0 0 0 1px}:host([side="left"]) .panel{border-width:0 1px 0 0}`,
   },
   {
     tag: 'sidebar',
@@ -58,6 +67,14 @@ export const interactive: TagSpec[] = [
     css: 'display:inline-block;position:relative;width:fit-content',
     attrs: { open: openFlag('') },
     extra: '::slotted(mk-menu){display:none}:host([open]) ::slotted(mk-menu){display:block}',
+  },
+  {
+    tag: 'popover',
+    doc: 'first child is the trigger; any other children form a floating panel opened by clicking it',
+    stateful: true,
+    css: 'display:inline-block;position:relative;width:fit-content',
+    attrs: { open: openFlag('') },
+    extra: `:host(:not([open])) ::slotted(:not(:first-child)){display:none}::slotted(:not(:first-child)){position:absolute;top:calc(100% + 6px);left:0;z-index:40;min-width:240px;padding:12px;border:${line};border-radius:${v('r')};background:${v('bg')};box-shadow:${v('shadow-lg')}}`,
   },
   {
     tag: 'menu',

@@ -24,8 +24,8 @@ describe('outline', () => {
 })
 
 describe('cheatsheet', () => {
-  const sheet = cheatsheet()
-  it('documents every tag in the registry', () => {
+  const sheet = cheatsheet({ packs: 'all' })
+  it('documents every tag in the registry when all packs are requested', () => {
     for (const s of all) expect(sheet).toContain(`${s.tag}`)
   })
   it('mentions intent attrs and responsive syntax', () => {
@@ -33,6 +33,6 @@ describe('cheatsheet', () => {
     expect(sheet).toContain('cols-md=3')
   })
   it('is compact', () => {
-    expect(sheet.length).toBeLessThan(5000)
+    expect(sheet.length).toBeLessThan(9000)
   })
 })

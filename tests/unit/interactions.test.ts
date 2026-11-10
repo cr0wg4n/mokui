@@ -37,7 +37,7 @@ describe('reference validation', () => {
   it('target must be able to open and close', () => {
     const e = errors('button opens=#b "x"\nbox #b')[0]!
     expect(e).toContain('targets <box>')
-    expect(e).toContain('modal drawer sidebar dropdown toast collapse')
+    expect(e).toContain('modal drawer sidebar dropdown popover toast collapse')
   })
   it('closes needs an overlay or a target; opens/toggles need a target', () => {
     expect(errors('button closes "x"')[0]).toContain('closes needs an enclosing overlay')
@@ -98,11 +98,11 @@ describe('outline shows flows and states', () => {
 describe('cheat sheet', () => {
   const sheet = cheatsheet()
   it('documents interactions, themes and the new tags', () => {
-    expect(sheet).toContain('Interactions: targets are #names of modal drawer sidebar dropdown toast collapse')
+    expect(sheet).toContain('Interactions: targets are #names of modal drawer sidebar dropdown popover toast collapse')
     expect(sheet).toContain('theme=modern|dark|wire')
-    for (const t of ['modal', 'drawer', 'sidebar', 'dropdown', 'menu', 'item', 'tooltip', 'toast', 'collapse', 'tabs', 'tab']) expect(sheet).toContain(`${t}`)
+    for (const t of ['modal', 'drawer', 'sidebar', 'dropdown', 'popover', 'menu', 'item', 'tooltip', 'toast', 'collapse', 'tabs', 'tab']) expect(sheet.split('\n').some((l) => l.startsWith(`${t}:`) || l.startsWith(`${t} `)), t).toBe(true)
   })
   it('stays compact', () => {
-    expect(sheet.length).toBeLessThan(8000)
+    expect(sheet.length).toBeLessThan(6500)
   })
 })

@@ -17,8 +17,9 @@ function tokenize(line: string): Tok[] {
   const re = /([\w-]+)=(?:"((?:[^"\\]|\\.)*)"|(\S+))|"((?:[^"\\]|\\.)*)"|(\S+)/g
   let m: RegExpExecArray | null
   while ((m = re.exec(line))) {
-    if (m[1] !== undefined) out.push({ k: 'attr', key: m[1], val: (m[2] ?? m[3])!.replace(/\\"/g, '"') })
-    else if (m[4] !== undefined) out.push({ k: 'text', val: m[4].replace(/\\"/g, '"') })
+    const unesc = (x: string) => x.replace(/\\"/g, '"').replace(/\\n/g, '\n')
+    if (m[1] !== undefined) out.push({ k: 'attr', key: m[1], val: unesc((m[2] ?? m[3])!) })
+    else if (m[4] !== undefined) out.push({ k: 'text', val: unesc(m[4]) })
     else out.push({ k: 'bare', val: m[5]! })
   }
   return out

@@ -20,7 +20,7 @@ export type Breakpoint = keyof typeof scale.bp
 export const themes = {
   modern: {
     fg: '#18181b', bg: '#ffffff', muted: '#71717a', line: '#e4e4e7', fill: '#f4f4f5',
-    accent: '#18181b', 'on-accent': '#ffffff', danger: '#dc2626',
+    accent: '#18181b', 'on-accent': '#ffffff', danger: '#dc2626', success: '#16a34a', warning: '#d97706', info: '#2563eb',
     r: '12px', 'r-sm': '8px',
     shadow: '0 1px 2px rgba(0,0,0,.05),0 1px 3px rgba(0,0,0,.08)',
     'shadow-lg': '0 12px 32px rgba(0,0,0,.16),0 2px 6px rgba(0,0,0,.08)',
@@ -28,7 +28,7 @@ export const themes = {
   },
   dark: {
     fg: '#fafafa', bg: '#09090b', muted: '#a1a1aa', line: '#27272a', fill: '#18181b',
-    accent: '#fafafa', 'on-accent': '#09090b', danger: '#f87171',
+    accent: '#fafafa', 'on-accent': '#09090b', danger: '#f87171', success: '#4ade80', warning: '#fbbf24', info: '#60a5fa',
     r: '12px', 'r-sm': '8px',
     shadow: '0 1px 2px rgba(0,0,0,.4)',
     'shadow-lg': '0 12px 32px rgba(0,0,0,.6)',
@@ -36,7 +36,7 @@ export const themes = {
   },
   wire: {
     fg: '#222222', bg: '#ffffff', muted: '#777777', line: '#bbbbbb', fill: '#f2f2f2',
-    accent: '#222222', 'on-accent': '#ffffff', danger: '#222222',
+    accent: '#222222', 'on-accent': '#ffffff', danger: '#222222', success: '#222222', warning: '#222222', info: '#222222',
     r: '4px', 'r-sm': '3px',
     shadow: 'none', 'shadow-lg': 'none',
     backdrop: 'rgba(0,0,0,.25)',
