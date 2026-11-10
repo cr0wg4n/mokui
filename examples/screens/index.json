@@ -1,0 +1,26 @@
+[
+  {
+    "id": "showcase",
+    "label": "Showcase: app completa"
+  },
+  {
+    "id": "analytics",
+    "label": "Analytics: gráficos y métricas"
+  },
+  {
+    "id": "forms",
+    "label": "Formularios: validación y controles"
+  },
+  {
+    "id": "mobile",
+    "label": "Móvil: tabbar, fab y bottom sheet"
+  },
+  {
+    "id": "landing",
+    "label": "Landing: hero, features y pricing"
+  },
+  {
+    "id": "gallery",
+    "label": "Catálogo: todos los elementos"
+  }
+]

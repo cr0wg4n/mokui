@@ -1,0 +1,6 @@
+node_modules
+dist
+*.log
+.vitest
+examples/*/dist
+examples/*/node_modules
