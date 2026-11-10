@@ -221,5 +221,75 @@
         "Saved"
       ]
     }
+  },
+  {
+    "id": "analytics",
+    "prompt": "An analytics dashboard: a breadcrumb, a title with a Day/Week/Month switch, four metric cards with deltas (revenue, users, churn, sessions), a line chart of traffic and a bar chart of sales, and pagination at the bottom.",
+    "expect": {
+      "tags": {
+        "chart": 2
+      },
+      "anyOf": [
+        [
+          "stat",
+          "card"
+        ],
+        [
+          "breadcrumb"
+        ],
+        [
+          "segmented"
+        ],
+        [
+          "pagination"
+        ]
+      ],
+      "text": [
+        "Revenue",
+        "Users"
+      ]
+    }
+  },
+  {
+    "id": "signup-validation",
+    "prompt": "A sign-up form: name, email with a helper text, a password field, and a username field showing an 'already taken' error. A 3-step progress indicator at the top with step 2 active, and a Create account button.",
+    "expect": {
+      "tags": {
+        "input": 3,
+        "button": 1
+      },
+      "anyOf": [
+        [
+          "steps"
+        ]
+      ],
+      "text": [
+        "Create account",
+        "taken"
+      ]
+    }
+  },
+  {
+    "id": "mobile-inbox",
+    "prompt": "A mobile inbox screen in a phone frame: header with a title, a segmented All/Unread switch, two message rows with avatars, a bottom tab bar with Inbox, Search, Alerts and Profile, and a floating compose button that opens a bottom sheet with To and Message fields and a Send button.",
+    "expect": {
+      "tags": {
+        "frame": 1,
+        "avatar": 2,
+        "drawer": 1,
+        "input": 1
+      },
+      "anyOf": [
+        [
+          "tabbar"
+        ],
+        [
+          "segmented"
+        ]
+      ],
+      "text": [
+        "Send"
+      ]
+    }
   }
 ]

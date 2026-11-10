@@ -15,7 +15,10 @@ if (!key) {
 }
 const model = process.env.EVAL_MODEL ?? 'claude-haiku-5-5'
 const prompts: { id: string; prompt: string; expect: Expect }[] = JSON.parse(readFileSync(new URL('./prompts.json', import.meta.url), 'utf8'))
-const system = `You draft UI mocks in the Mokui DSL. Reply with only the DSL in one code block.\n\n${cheatsheet()}`
+// Every pack by default, so the eval measures writing the DSL, not remembering to load a pack.
+// EVAL_PACKS=default evaluates the cheaper core+overlay sheet instead.
+const packs = process.env.EVAL_PACKS === 'default' ? undefined : 'all'
+const system = `You draft UI mocks in the Mokui DSL. Reply with only the DSL in one code block.\n\n${cheatsheet({ packs })}`
 
 async function ask(messages: { role: 'user' | 'assistant'; content: string }[]): Promise<string> {
   const res = await fetch('https://api.anthropic.com/v1/messages', {

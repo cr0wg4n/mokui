@@ -39,7 +39,7 @@ describe('eval scoring (offline)', () => {
     expect(t.ok).toBe(true)
   })
   it('every prompt has expectations and is satisfiable by some valid mock shape', () => {
-    expect(prompts).toHaveLength(15)
+    expect(prompts).toHaveLength(18)
     for (const p of prompts) expect(Object.keys(p.expect).length, p.id).toBeGreaterThan(0)
   })
 })
