@@ -1,60 +1,12 @@
 import { mount, outline, type ThemeName } from 'mokui'
+import { examples } from './examples'
 
-const sample = `// Everything here is clickable. Edit, switch the theme, drag the width.
-row
-  sidebar #nav
-    row g=sm align=center p=sm
-      avatar "A"
-      text bold "Acme"
-    item active icon=home "Dashboard"
-    item icon=user "Customers"
-    item icon=mail "Messages"
-    item icon=settings "Settings"
-    spacer
-    item danger icon=log-out "Sign out"
-  stack grow g=lg p=lg
-    row g=md align=center
-      button ghost toggles=#nav icon=menu "Menu"
-      text xl bold "Customers"
-      spacer
-      input search "Search"
-      dropdown #more
-        button icon=more-horizontal "Actions"
-        menu end
-          item icon=pencil "Edit"
-          item icon=download "Export"
-          divider
-          item danger icon=trash "Delete"
-      button primary opens=#invite icon=plus "Invite"
-    tabs
-      tab "All"
-        grid cols=1 cols-md=3 g=md
-          card "Active"
-            text xl bold "1,204"
-            badge primary "+12%"
-          card "Trial"
-            text xl bold "320"
-            badge "steady"
-          card "Churned"
-            text xl bold "48"
-            badge "-2%"
-      tab "Billing"
-        text "Billing panel"
-    table "Name|Plan|Status"
-      tr "Ana Martin|Pro|Active"
-      tr "Bo Lee|Free|Trial"
-  modal #invite md "Invite teammate"
-    input email label="Email" "name@company.com"
-    select label="Role" "Admin|Editor|Viewer"
-    row g=sm justify=end
-      button ghost closes "Cancel"
-      button primary closes "Send invite"
-`
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T
 const src = $<HTMLTextAreaElement>('src')
 const app = $('app')
 const err = $('err')
 const w = $<HTMLInputElement>('w')
+const picker = $<HTMLSelectElement>('example')
 const store = (k: string, v?: string) => {
   try {
     return v === undefined ? localStorage.getItem(k) : localStorage.setItem(k, v)
@@ -62,6 +14,9 @@ const store = (k: string, v?: string) => {
     return null
   }
 }
+
+picker.replaceChildren(...examples.map((e) => Object.assign(document.createElement('option'), { value: e.id, textContent: e.label })))
+const current = () => examples.find((e) => e.id === picker.value) ?? examples[0]!
 
 const render = () => {
   app.style.width = `${w.value}px`
@@ -73,10 +28,20 @@ const render = () => {
   } catch (e) {
     err.textContent = (e as Error).message
   }
-  store('mokui-src-v3', src.value)
+  // edits are kept per example; picking an example again shows your last edit
+  store(`mokui-v4-${current().id}`, src.value)
 }
-src.value = store('mokui-src-v3') ?? sample
+
+const load = () => {
+  src.value = store(`mokui-v4-${current().id}`) ?? current().src
+  app.style.minHeight = ''
+  render()
+}
+
+picker.value = store('mokui-v4-example') ?? examples[0]!.id
+if (!picker.value) picker.value = examples[0]!.id
+picker.addEventListener('input', () => (store('mokui-v4-example', picker.value), load()))
 src.addEventListener('input', render)
 w.addEventListener('input', render)
 $('theme').addEventListener('input', render)
-render()
+load()

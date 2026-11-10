@@ -31,45 +31,114 @@ afterAll(() => browser?.close())
 
 for (const app of ['vue', 'react']) {
   describe(`${app} consumer`, () => {
-    const open = async (width: number) => {
+    const open = async (width = 1200) => {
       const { server, url } = await serve(join(root, 'examples', app, 'dist'))
       const page = await browser.newPage({ viewport: { width, height: 900 } })
       const errors: string[] = []
       page.on('pageerror', (e) => errors.push(e.message))
       page.on('console', (m) => m.type() === 'error' && errors.push(m.text()))
       await page.goto(url)
-      await page.waitForSelector('#inline')
+      await page.waitForSelector('#stage mk-sidebar')
       return { page, errors, close: async () => (await page.close(), server.close()) }
     }
-    const cols = (page: import('playwright').Page) =>
-      page.evaluate(() => getComputedStyle(document.querySelector('#from-file mk-grid')!).gridTemplateColumns.split(' ').length)
+    type Page = import('playwright').Page
+    const modalDisplay = (page: Page) => page.evaluate(() => getComputedStyle(document.querySelector('#stage mk-modal')!).display)
+    const gridCols = (page: Page, sel: string) =>
+      page.evaluate((s) => getComputedStyle(document.querySelector(s)!).gridTemplateColumns.split(' ').length, sel)
 
-    it('renders custom elements with shadow roots and no errors', async () => {
-      const { page, errors, close } = await open(1000)
-      expect(await page.evaluate(() => !!document.querySelector('#from-file mk-icon')!.shadowRoot)).toBe(true)
-      expect(await page.evaluate(() => getComputedStyle(document.querySelector('#inline')!).gap)).toBe('12px')
-      expect(await page.evaluate(() => document.querySelector('#inline mk-text')!.textContent)).toMatch(/Written as/)
+    it('renders the showcase as custom elements with shadow roots and no console errors', async () => {
+      const { page, errors, close } = await open()
+      expect(await page.evaluate(() => !!document.querySelector('#stage mk-icon')!.shadowRoot)).toBe(true)
+      expect(await page.evaluate(() => document.querySelectorAll('#stage *').length)).toBeGreaterThan(150)
+      expect(await page.evaluate(() => getComputedStyle(document.querySelector('#stage mk-button[variant=primary]')!).backgroundColor)).toBe('rgb(24, 24, 27)')
       expect(errors).toEqual([])
       await close()
     })
-    it('clicks work: a trigger opens the modal declared in the .mk file, closes opens it back', async () => {
-      const { page, errors, close } = await open(1000)
-      const display = () => page.evaluate(() => getComputedStyle(document.querySelector('#from-file mk-modal')!).display)
-      expect(await display()).toBe('none')
-      await page.click('#from-file mk-button[opens]')
-      expect(await display()).toBe('flex')
-      await page.evaluate(() => (document.querySelector('#from-file mk-modal mk-button[closes]') as HTMLElement).click())
-      expect(await display()).toBe('none')
+    it('every example renders without errors', async () => {
+      const { page, errors, close } = await open()
+      const ids = await page.$$eval('#example option', (os) => os.map((o) => (o as HTMLOptionElement).value))
+      expect(ids).toEqual(['showcase', 'analytics', 'forms', 'mobile', 'landing', 'gallery'])
+      for (const id of ids) {
+        await page.selectOption('#example', id)
+        await page.waitForFunction(() => document.querySelectorAll('#stage *').length > 20)
+        expect(await page.evaluate(() => document.querySelectorAll('#stage mk-icon, #stage mk-text, #stage mk-box, #stage mk-stack').length), id).toBeGreaterThan(5)
+      }
       expect(errors).toEqual([])
       await close()
     })
-    it('.mk import goes through the Vite plugin and responds to container width', async () => {
-      const wide = await open(1000)
-      expect(await cols(wide.page)).toBe(3)
+    it('clicks work: triggers declared in a .mk file open and close the modal, the sidebar toggles', async () => {
+      const { page, errors, close } = await open()
+      expect(await modalDisplay(page)).toBe('none')
+      await page.click('#stage mk-button[opens=invite]')
+      expect(await modalDisplay(page)).toBe('flex')
+      await page.evaluate(() => (document.querySelector('#stage mk-modal mk-button[closes]') as HTMLElement).click())
+      expect(await modalDisplay(page)).toBe('none')
+      const sidebar = () => page.evaluate(() => getComputedStyle(document.querySelector('#stage mk-sidebar')!).display)
+      expect(await sidebar()).toBe('flex')
+      await page.click('#stage mk-button[toggles=nav]')
+      expect(await sidebar()).toBe('none')
+      expect(errors).toEqual([])
+      await close()
+    })
+    it('tabs and dropdowns inside injected markup respond to clicks', async () => {
+      const { page, close } = await open()
+      const panelVisible = (i: number) => page.evaluate((n) => getComputedStyle(document.querySelectorAll('#stage mk-tab')[n]!).display !== 'none', i)
+      expect(await panelVisible(0)).toBe(true)
+      expect(await panelVisible(1)).toBe(false)
+      await page.evaluate(() => (document.querySelectorAll('#stage mk-tabs')[0]!.shadowRoot!.querySelectorAll('.tabbtn')[1] as HTMLElement).click())
+      expect(await panelVisible(1)).toBe(true)
+      await page.click('#stage mk-dropdown mk-button')
+      expect(await page.evaluate(() => document.querySelector('#stage mk-dropdown')!.hasAttribute('open'))).toBe(true)
+      await close()
+    })
+    it('breakpoints follow the container width', async () => {
+      const wide = await open(1200)
+      await wide.page.selectOption('#example', 'analytics')
+      await wide.page.waitForSelector('#stage mk-chart')
+      expect(await gridCols(wide.page, '#stage mk-grid[cols-md="3"]')).toBe(3)
       await wide.close()
       const narrow = await open(500)
-      expect(await cols(narrow.page)).toBe(1)
+      await narrow.page.selectOption('#example', 'analytics')
+      await narrow.page.waitForSelector('#stage mk-chart')
+      expect(await gridCols(narrow.page, '#stage mk-grid[cols-md="3"]')).toBe(1)
       await narrow.close()
+    })
+    it('the width slider and the theme select change the picture', async () => {
+      const { page, close } = await open(1200)
+      const stageWidth = () => page.evaluate(() => Math.round(document.querySelector('#stage')!.getBoundingClientRect().width))
+      expect(await stageWidth()).toBeGreaterThan(1000)
+      await page.fill('#width', '600')
+      expect(await stageWidth()).toBe(600)
+      await page.selectOption('#theme', 'dark')
+      expect(await page.evaluate(() => getComputedStyle(document.querySelector('#stage')!).backgroundColor)).toBe('rgb(9, 9, 11)')
+      expect(await page.evaluate(() => getComputedStyle(document.querySelector('#stage mk-text')!).color)).toBe('rgb(250, 250, 250)')
+      await page.selectOption('#theme', 'wire')
+      expect(await page.evaluate(() => getComputedStyle(document.querySelector('#stage mk-box')!).borderRadius)).toBe('4px')
+      await close()
+    })
+    it('framework state drives Mokui elements written as plain tags', async () => {
+      const { page, errors, close } = await open()
+      const read = () => page.evaluate(() => ({
+        progress: document.querySelector('#reactive mk-progress')!.getAttribute('aria-valuenow'),
+        stars: document.querySelectorAll('#reactive mk-rating')[0]!.shadowRoot!.querySelectorAll('svg[fill=currentColor]').length,
+        badge: document.querySelector('#reactive mk-badge')!.textContent,
+        warn: document.querySelector('#reactive mk-badge')!.getAttribute('variant'),
+      }))
+      expect(await read()).toEqual({ progress: '60', stars: 3, badge: '60%', warn: null })
+      await page.fill('#seats', '90')
+      expect(await read()).toEqual({ progress: '90', stars: 5, badge: '90%', warn: 'warning' })
+      expect(errors).toEqual([])
+      await close()
+    })
+    it('native events on elements work: a click handler updates framework state, a chip removes itself', async () => {
+      const { page, close } = await open()
+      await page.click('#reactive mk-button')
+      await page.click('#reactive mk-button')
+      expect(await page.evaluate(() => document.querySelector('#reactive mk-button')!.textContent)).toBe('Clicked 2 times')
+      expect(await page.evaluate(() => document.querySelectorAll('#reactive mk-chip').length)).toBe(3)
+      await page.click('#reactive mk-chip')
+      expect(await page.evaluate(() => Array.from(document.querySelectorAll('#reactive mk-chip')).map((c) => c.textContent))).toEqual(['research', 'launch'])
+      await close()
     })
   })
 }
