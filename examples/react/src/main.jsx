@@ -1,7 +1,7 @@
 import 'mokui' // registers <mk-*> elements
 import { useMemo, useState } from 'react'
 import { createRoot } from 'react-dom/client'
-import { themeStyle } from 'mokui'
+import { accents, themeStyle } from 'mokui'
 import meta from '../../screens/index.json'
 // Each .mk file becomes an HTML string through the mokui Vite plugin.
 import showcase from '../../screens/showcase.mk'
@@ -16,6 +16,9 @@ const pages = { showcase, analytics, forms, mobile, landing, gallery }
 function App() {
   const [screen, setScreen] = useState('showcase')
   const [theme, setTheme] = useState('modern')
+  const [accent, setAccent] = useState('') // '' = the theme's own accent
+  const [radius, setRadius] = useState('')
+  const [font, setFont] = useState('')
   const [width, setWidth] = useState(1100)
   // Plain React state drives <mk-*> elements below.
   const [seats, setSeats] = useState(60)
@@ -24,8 +27,15 @@ function App() {
 
   // Positioned query container: breakpoints follow this width and overlays cover it.
   const stage = useMemo(
-    () => ({ containerType: 'inline-size', position: 'relative', minHeight: 560, width: '100%', maxWidth: width, ...themeStyle(theme) }),
-    [theme, width],
+    () => ({
+      containerType: 'inline-size',
+      position: 'relative',
+      minHeight: 560,
+      width: '100%',
+      maxWidth: width,
+      ...themeStyle({ base: theme, accent: accent || undefined, radius: radius || undefined, font: font || undefined }),
+    }),
+    [theme, accent, radius, font, width],
   )
 
   return (
@@ -46,6 +56,33 @@ function App() {
             <option>modern</option>
             <option>dark</option>
             <option>wire</option>
+          </select>
+        </label>
+        <label>
+          accent{' '}
+          <select id="accent" value={accent} onChange={(e) => setAccent(e.target.value)}>
+            <option value="">default</option>
+            {Object.keys(accents).map((n) => (
+              <option key={n}>{n}</option>
+            ))}
+          </select>
+        </label>
+        <label>
+          radius{' '}
+          <select id="radius" value={radius} onChange={(e) => setRadius(e.target.value)}>
+            <option value="">default</option>
+            <option>sharp</option>
+            <option>soft</option>
+            <option>round</option>
+          </select>
+        </label>
+        <label>
+          font{' '}
+          <select id="font" value={font} onChange={(e) => setFont(e.target.value)}>
+            <option value="">default</option>
+            <option>sans</option>
+            <option>serif</option>
+            <option>mono</option>
           </select>
         </label>
         <label>

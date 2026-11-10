@@ -116,6 +116,32 @@ for (const app of ['vue', 'react']) {
       expect(await page.evaluate(() => getComputedStyle(document.querySelector('#stage mk-box')!).borderRadius)).toBe('4px')
       await close()
     })
+    it('accent, radius and font controls re-skin the screen, in light and dark, and reset cleanly', async () => {
+      const { page, errors, close } = await open(1200)
+      const look = () =>
+        page.evaluate(() => {
+          const b = getComputedStyle(document.querySelector('#stage mk-button[variant=primary]')!)
+          return { bg: b.backgroundColor, radius: getComputedStyle(document.querySelector('#stage mk-box')!).borderRadius, font: b.fontFamily }
+        })
+      const base = await look()
+      expect(base).toMatchObject({ bg: 'rgb(24, 24, 27)', radius: '12px' })
+      await page.selectOption('#accent', 'indigo')
+      expect((await look()).bg).toBe('rgb(79, 70, 229)')
+      await page.selectOption('#radius', 'sharp')
+      expect((await look()).radius).toBe('2px')
+      await page.selectOption('#font', 'serif')
+      expect((await look()).font).toContain('Georgia')
+      await page.selectOption('#theme', 'dark')
+      expect((await look()).bg).toBe('rgb(129, 140, 248)') // the lighter indigo for a dark surface
+      expect((await look()).radius).toBe('2px')
+      await page.selectOption('#accent', '')
+      await page.selectOption('#radius', '')
+      await page.selectOption('#font', '')
+      await page.selectOption('#theme', 'modern')
+      expect(await look()).toEqual(base)
+      expect(errors).toEqual([])
+      await close()
+    })
     it('framework state drives Mokui elements written as plain tags', async () => {
       const { page, errors, close } = await open()
       const read = () => page.evaluate(() => ({

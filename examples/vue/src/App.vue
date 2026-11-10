@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue'
-import { themeStyle } from 'mokui'
+import { accents, themeStyle } from 'mokui'
 import meta from '../../screens/index.json'
 // Each .mk file becomes an HTML string through the mokui Vite plugin.
 import showcase from '../../screens/showcase.mk'
@@ -13,6 +13,9 @@ import gallery from '../../screens/gallery.mk'
 const pages = { showcase, analytics, forms, mobile, landing, gallery }
 const screen = ref('showcase')
 const theme = ref('modern')
+const accent = ref('') // '' = the theme's own accent
+const radius = ref('')
+const font = ref('')
 const width = ref(1100)
 const html = computed(() => pages[screen.value])
 // Positioned query container: breakpoints follow this width and overlays cover it.
@@ -22,7 +25,7 @@ const stage = computed(() => ({
   minHeight: '560px',
   width: '100%',
   maxWidth: `${width.value}px`,
-  ...themeStyle(theme.value),
+  ...themeStyle({ base: theme.value, accent: accent.value || undefined, radius: radius.value || undefined, font: font.value || undefined }),
 }))
 
 // Plain Vue state drives <mk-*> elements below.
@@ -37,6 +40,9 @@ const remove = (t) => (tags.value = tags.value.filter((x) => x !== t))
     <h1>mokui + Vue</h1>
     <label>example <select id="example" v-model="screen"><option v-for="m in meta" :key="m.id" :value="m.id">{{ m.label }}</option></select></label>
     <label>theme <select id="theme" v-model="theme"><option>modern</option><option>dark</option><option>wire</option></select></label>
+    <label>accent <select id="accent" v-model="accent"><option value="">default</option><option v-for="(_, name) in accents" :key="name">{{ name }}</option></select></label>
+    <label>radius <select id="radius" v-model="radius"><option value="">default</option><option>sharp</option><option>soft</option><option>round</option></select></label>
+    <label>font <select id="font" v-model="font"><option value="">default</option><option>sans</option><option>serif</option><option>mono</option></select></label>
     <label>container width <input id="width" type="range" min="280" max="1400" v-model.number="width" /> {{ width }}px</label>
     <span class="note">everything is clickable</span>
   </header>
