@@ -9,6 +9,10 @@ export interface RenderOptions {
   out: string
   /** Device scale factor (default 2). */
   scale?: number
+  /** Names of stateful elements to draw open (modal, drawer, dropdown...). */
+  open?: string[]
+  /** Look: modern (default), dark or wire. */
+  theme?: 'modern' | 'dark' | 'wire'
 }
 
 /** Browser bundle sits next to this file's dist output: dist/browser/mokui.iife.js */
@@ -25,7 +29,7 @@ const bundle = () => {
  * The DSL is validated in Node first, so errors surface before a browser starts.
  */
 export async function renderPng(src: string, opts: RenderOptions): Promise<void> {
-  html(src) // fail fast with line-numbered errors
+  html(src, { open: opts.open }) // fail fast with line-numbered errors
   let pw: typeof import('playwright')
   try {
     pw = await import('playwright')
@@ -38,7 +42,7 @@ export async function renderPng(src: string, opts: RenderOptions): Promise<void>
     const page = await browser.newPage({ viewport: { width: width + 32, height: 800 }, deviceScaleFactor: opts.scale ?? 2 })
     await page.setContent(`<body style="margin:0;padding:16px;background:#fff"><div id="app" style="width:${width}px"></div></body>`)
     await page.addScriptTag({ path: bundle() })
-    await page.evaluate((s) => (window as any).mokui.mount(document.getElementById('app')!, s), src)
+    await page.evaluate(([s, o]) => (window as any).mokui.mount(document.getElementById('app')!, s, o), [src, { open: opts.open, theme: opts.theme }] as const)
     await page.locator('#app').screenshot({ path: opts.out })
   } finally {
     await browser.close()

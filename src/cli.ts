@@ -8,7 +8,7 @@ import { renderPng } from './render-png'
 const usage = `mokui <command>
   cheatsheet                       print the DSL reference for agents
   outline <file|->                 print the structural view (tree, interactive elements, notes)
-  render <file|-> -o out.png [-w 600]   render a PNG (needs optional playwright)`
+  render <file|-> -o out.png [-w 600] [--open a,b] [--theme dark|wire]\n                                   render a PNG (needs optional playwright); --open draws those\n                                   modals/drawers/dropdowns open`
 
 const [cmd, ...rest] = process.argv.slice(2)
 const flag = (f: string, short: string) => {
@@ -23,7 +23,9 @@ try {
   else if (cmd === 'render') {
     const out = flag('--out', '-o')
     if (!out) throw new Error('render needs -o <file.png>')
-    await renderPng(read(rest[0]), { out, width: Number(flag('--width', '-w') ?? 600) })
+    const open = flag('--open', '--open')?.split(',').filter(Boolean)
+    const theme = flag('--theme', '--theme') as 'modern' | 'dark' | 'wire' | undefined
+    await renderPng(read(rest[0]), { out, width: Number(flag('--width', '-w') ?? 600), open, theme })
     console.log(out)
   } else console.log(usage)
 } catch (e) {

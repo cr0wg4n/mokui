@@ -16,7 +16,9 @@ export function print(nodes: MkNode[], depth = 0): string {
         if (k === 'name') continue
         if (k === textAttr) continue
         const def = spec?.attrs[k]
-        if (v === '') parts.push(k)
+        if (k === 'opens' || k === 'toggles') parts.push(`${k}=#${v}`)
+        else if (k === 'closes') parts.push(v === '' ? 'closes' : `closes=#${v}`)
+        else if (v === '') parts.push(k)
         // Bare form only where the parser resolves it back to the same attribute.
         else if (def?.bare && def.rules && /^[^\s"=#]+$/.test(v)) parts.push(v)
         else if (def?.bare && def.free && !freeBareUsed && /^[^\s"=#]+$/.test(v) && !(v in (spec?.attrs ?? {}))) (parts.push(v), (freeBareUsed = true))

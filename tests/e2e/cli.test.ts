@@ -32,6 +32,35 @@ describe('cli', () => {
     }
     expect(dims(400)).toBeGreaterThan(dims(900))
   })
+  it('--open draws a modal that is hidden by default', () => {
+    const src = 'button opens=#m "Open"\nmodal #m sm "Hello"\n  text "Body"'
+    const size = (...extra: string[]) => {
+      const out = join(dir, `s${extra.join('')}.png`)
+      execFileSync('node', ['dist/cli.js', 'render', '-', '-o', out, '-w', '500', ...extra], { input: src, stdio: ['pipe', 'pipe', 'pipe'] })
+      return readFileSync(out)
+    }
+    const closed = size()
+    const open = size('--open', 'm')
+    expect(Buffer.compare(closed, open)).not.toBe(0)
+    expect(open.length).toBeGreaterThan(closed.length) // dialog + backdrop add detail
+  })
+  it('--open with an unknown name fails with a clear message', () => {
+    expect(() => execFileSync('node', ['dist/cli.js', 'render', '-', '-o', join(dir, 'y.png'), '--open', 'zzz'], { input: 'text "x"', stdio: ['pipe', 'pipe', 'pipe'] })).toThrow(/no element named #zzz/)
+  })
+  it('--theme changes the picture', () => {
+    const out = (t: string) => {
+      const f = join(dir, `t-${t}.png`)
+      execFileSync('node', ['dist/cli.js', 'render', '-', '-o', f, '-w', '300', '--theme', t], { input: 'stack p=md\n  text "Hi"\n  button primary "Go"', stdio: ['pipe', 'pipe', 'pipe'] })
+      return readFileSync(f)
+    }
+    expect(Buffer.compare(out('modern'), out('dark'))).not.toBe(0)
+    expect(Buffer.compare(out('modern'), out('wire'))).not.toBe(0)
+  })
+  it('outline shows interactions and states', () => {
+    const o = execFileSync('node', ['dist/cli.js', 'outline', '-'], { input: 'button #b opens=#m "Open"\nmodal #m "T"', encoding: 'utf8' })
+    expect(o).toContain('button "Open" #b -> opens #m')
+    expect(o).toContain('modal "T" #m (starts closed)')
+  })
   it('reports DSL errors with line numbers and exits non-zero', () => {
     expect(() => execFileSync('node', ['dist/cli.js', 'render', '-', '-o', join(dir, 'x.png')], { input: 'row\n  nope', stdio: ['pipe', 'pipe', 'pipe'] })).toThrow(/line 2: unknown tag/)
   })

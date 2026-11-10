@@ -20,6 +20,8 @@ export function svgIcon(name: string): SVGSVGElement {
 
 interface Renderer {
   template: string
+  /** Once, after the template is in place: wire internal events. */
+  setup?: (el: HTMLElement, root: ShadowRoot) => void
   update?: (el: HTMLElement, root: ShadowRoot) => void
 }
 
@@ -44,7 +46,77 @@ const fieldText = (el: HTMLElement, root: ShadowRoot, fallback = '') => {
 const box: Renderer = { template: '<span class="box"></span><slot></slot>' }
 const fieldTpl = '<div class="label"></div><div class="field"><span class="ico pre"></span><span class="txt"></span><span class="ico post"></span></div>'
 
+const iconButton = (root: ShadowRoot, sel: string, name: string, onClick: () => void) => {
+  const b = q(root, sel)
+  b.append(svgIcon(name))
+  b.addEventListener('click', (e) => (e.stopPropagation(), onClick()))
+}
+const title = (el: HTMLElement, root: ShadowRoot) => {
+  const t = q(root, '.title')
+  t.textContent = el.getAttribute('label') ?? ''
+}
+const close = (el: HTMLElement) => el.removeAttribute('open')
+const dialog: Renderer = {
+  template: '<div class="panel"><div class="head"><span class="title"></span><button class="x" aria-label="Close"></button></div><div class="body"><slot></slot></div></div>',
+  setup(el, root) {
+    iconButton(root, '.x', 'x', () => close(el))
+    // a click on the backdrop itself (not the panel) closes
+    el.addEventListener('click', (e) => e.composedPath()[0] === el && close(el))
+  },
+  update: title,
+}
+const withIcon: Renderer = {
+  template: '<span class="ico"></span><slot></slot>',
+  update: (el, root) => put(q(root, '.ico'), el.getAttribute('icon')),
+}
+
 export const renderers: Record<string, Renderer> = {
+  modal: dialog,
+  drawer: dialog,
+  item: withIcon,
+  toast: {
+    template: '<span class="msg"><slot></slot></span><button class="x" aria-label="Close"></button>',
+    setup: (el, root) => iconButton(root, '.x', 'x', () => close(el)),
+  },
+  tooltip: {
+    template: '<slot></slot><span class="tip"></span>',
+    update: (el, root) => (q(root, '.tip').textContent = el.getAttribute('tip') ?? ''),
+  },
+  collapse: {
+    template: '<div class="head"><span class="title"></span><span class="chev"></span></div><div class="body"><slot></slot></div>',
+    setup: (el, root) => q(root, '.head').addEventListener('click', () => el.toggleAttribute('open')),
+    update(el, root) {
+      title(el, root)
+      put(q(root, '.chev'), el.hasAttribute('open') ? 'chevron-up' : 'chevron-down')
+    },
+  },
+  tabs: {
+    template: '<div class="strip" role="tablist"></div><slot></slot>',
+    setup(el, root) {
+      root.querySelector('slot')!.addEventListener('slotchange', () => renderers.tabs!.update!(el, root))
+      q(root, '.strip').addEventListener('click', (e) => {
+        const b = (e.target as HTMLElement).closest<HTMLElement>('[data-i]')
+        if (b) el.setAttribute('active', String(Number(b.dataset.i) + 1))
+      })
+    },
+    update(el, root) {
+      const panels = Array.from(el.children).filter((c) => c.localName === 'mk-tab') as HTMLElement[]
+      const labels = panels.length ? panels.map((p) => p.getAttribute('label') ?? '') : (el.getAttribute('opts') ?? '').split('|').map((t) => t.trim()).filter(Boolean)
+      const idx = Math.min(Math.max((Number(el.getAttribute('active')) || 1) - 1, 0), Math.max(labels.length - 1, 0))
+      panels.forEach((p, i) => (p.hidden = i !== idx))
+      q(root, '.strip').replaceChildren(
+        ...labels.map((l, i) => {
+          const b = document.createElement('button')
+          b.className = 'tabbtn'
+          b.setAttribute('role', 'tab')
+          b.setAttribute('aria-selected', String(i === idx))
+          b.dataset.i = String(i)
+          b.textContent = l
+          return b
+        }),
+      )
+    },
+  },
   icon: {
     template: '',
     update(el, root) {

@@ -89,7 +89,8 @@ describe('checkbox, radio, switch', () => {
   it('radio is round; checked draws a dot', () => {
     const r = render('radio checked "A"').querySelector('mk-radio')!
     expect(css(sr(r).querySelector('.box')!).borderRadius).toBe('50%')
-    expect(getComputedStyle(sr(r).querySelector('.box')!, '::after').content).toBe('""')
+    expect(css(sr(r).querySelector('.box')!).borderTopWidth).toBe('5px')
+    expect(css(sr(render('radio "A"').querySelector('mk-radio')!).querySelector('.box')!).borderTopWidth).toBe('1px')
   })
   it('switch knob moves when on', () => {
     const x = (src: string) => {

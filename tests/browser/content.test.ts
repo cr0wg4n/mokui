@@ -36,7 +36,7 @@ describe('avatar and badge', () => {
 describe('text modifiers', () => {
   it('bold, muted, center', () => {
     const t = render('text bold muted center "x"').querySelector('mk-text')!
-    expect(css(t).fontWeight).toBe('700')
+    expect(css(t).fontWeight).toBe('650')
     expect(css(t).textAlign).toBe('center')
     expect(css(t).color).not.toBe(css(render('text "x"').querySelector('mk-text')!).color)
   })
@@ -46,7 +46,8 @@ describe('recipes render', () => {
   it('card is a bordered box with a bold title', () => {
     const r = render('card "Plan"\n  text "body"')
     expect(css(r.querySelector('mk-box')!).borderTopWidth).toBe('1px')
-    expect(css(r.querySelector('mk-text')!).fontWeight).toBe('700')
+    expect(css(r.querySelector('mk-text')!).fontWeight).toBe('650')
+    expect(css(r.querySelector('mk-box')!).boxShadow).not.toBe('none')
   })
   it('navbar puts brand left and children right', () => {
     const r = render('navbar "Acme"\n  icon user', 600)
@@ -60,10 +61,5 @@ describe('recipes render', () => {
     expect(grids).toHaveLength(3)
     const lefts = grids.map((g) => rect(g.querySelectorAll('mk-text')[1]!).left)
     expect(new Set(lefts.map(Math.round)).size).toBe(1)
-  })
-  it('tabs shows the active tab bold', () => {
-    const t = Array.from(render('tabs "A|B" active=2').querySelectorAll('mk-text'))
-    expect(css(t[1]!).fontWeight).toBe('700')
-    expect(css(t[0]!).fontWeight).not.toBe('700')
   })
 })

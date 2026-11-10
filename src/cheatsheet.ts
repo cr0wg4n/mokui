@@ -1,5 +1,5 @@
 import { scale } from './scale'
-import { INTENT } from './registry'
+import { INTENT, INTERACT } from './registry'
 import { all } from './specs'
 
 const names = (o: object) => Object.keys(o).join('|')
@@ -15,7 +15,8 @@ export function cheatsheet(): string {
   const lines = [
     'Mokui DSL: one element per line, 2-space indent = child. Line: tag [bare words] [key=value] ["text"] [#name]. "//" starts a comment line.',
     `Sets: ${sets.map(([n, v]) => `${n}=${v}`).join('  ')}`,
-    `Any tag also takes: ${Object.entries(INTENT).map(([k, d]) => `${k} (${d.doc})`).join(', ')}.`,
+    `Any tag also takes: ${Object.entries({ ...INTENT, ...INTERACT }).map(([k, d]) => `${k}${d.rules ? '=' + Object.keys(d.rules).join('|') : ''} (${d.doc})`).join(', ')}.`,
+    `Interactions: targets are #names of ${all.filter((t) => t.stateful).map((t) => t.tag).join(' ')}. They start closed (sidebar starts open); add the \`open\` flag (sidebar: \`closed\`) to choose the start state. dropdown, collapse and tabs also react to clicks on their own. No logic: only open/close/select.`,
     'Attrs marked * can be a bare word (text lg, grid 3, input email, button primary). Flags are bare words too (bold, disabled).',
     'Responsive (container width, mobile-first): add -sm|-md|-lg to attrs marked ~, e.g. cols=1 cols-md=3. grid min=xs..xl (column width) reflows with no breakpoints.',
     '',

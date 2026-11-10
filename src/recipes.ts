@@ -7,7 +7,7 @@ const n = (tag: string, attrs: Record<string, string> = {}, children: RNode[] = 
 }
 /** Attributes every recipe passes to its outer node. */
 const carry = (a: Record<string, string>) =>
-  Object.fromEntries(Object.entries(a).filter(([k]) => ['name', 'role', 'note', 'w', 'h'].includes(k)))
+  Object.fromEntries(Object.entries(a).filter(([k]) => ['name', 'role', 'note', 'theme', 'opens', 'toggles', 'closes', 'w', 'h'].includes(k)))
 const items = (s: string | undefined) => (s ? s.split('|').map((x) => x.trim()) : [])
 
 const sp = { g: A.g, p: A.p }
@@ -20,7 +20,7 @@ export const recipes: TagSpec[] = [
     expand: (node) => [
       n(
         'box',
-        { p: node.attrs.p ?? 'md', g: node.attrs.g ?? 'sm', ...carry(node.attrs) },
+        { p: node.attrs.p ?? 'md', g: node.attrs.g ?? 'sm', raised: '', ...carry(node.attrs) },
         [...(node.text ? [n('text', { s: 'lg', bold: '' }, [], node.text)] : []), ...node.children],
       ),
     ],
@@ -39,24 +39,6 @@ export const recipes: TagSpec[] = [
         n('divider'),
       ]),
     ],
-  },
-  {
-    tag: 'tabs',
-    doc: 'tab strip; quoted "A|B|C"; active=N (1-based, default 1)',
-    attrs: { active: { doc: 'active tab, 1-based', free: true } },
-    expand: (node) => {
-      const act = Number(node.attrs.active ?? 1) - 1
-      return [
-        n('stack', { g: 'xs', ...carry(node.attrs) }, [
-          n(
-            'row',
-            { g: 'lg' },
-            items(node.text).map((t, i) => n('text', i === act ? { bold: '' } : { muted: '' }, [], t)),
-          ),
-          n('divider'),
-        ]),
-      ]
-    },
   },
   {
     tag: 'list',

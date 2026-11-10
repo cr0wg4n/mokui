@@ -7,7 +7,7 @@ describe('outline', () => {
     'stack #login',
     '  input email label="Email" #email "you@x.com"',
     '  button primary #submit note="calls POST /login" "Sign in"',
-    '  tabs "A|B"',
+    '  card "Help"',
   ].join('\n')
   it('lists canonical tree, interactive inventory and notes', () => {
     const o = outline(src)
@@ -18,8 +18,8 @@ describe('outline', () => {
     expect(o).toContain('submit: calls POST /login')
   })
   it('keeps recipes as written, expands on request', () => {
-    expect(outline(src)).toContain('tabs "A|B"')
-    expect(outline(src, { expandRecipes: true })).not.toContain('tabs')
+    expect(outline(src)).toContain('card "Help"')
+    expect(outline(src, { expandRecipes: true })).not.toContain('card')
   })
 })
 

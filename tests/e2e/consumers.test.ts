@@ -52,6 +52,17 @@ for (const app of ['vue', 'react']) {
       expect(errors).toEqual([])
       await close()
     })
+    it('clicks work: a trigger opens the modal declared in the .mk file, closes opens it back', async () => {
+      const { page, errors, close } = await open(1000)
+      const display = () => page.evaluate(() => getComputedStyle(document.querySelector('#from-file mk-modal')!).display)
+      expect(await display()).toBe('none')
+      await page.click('#from-file mk-button[opens]')
+      expect(await display()).toBe('flex')
+      await page.evaluate(() => (document.querySelector('#from-file mk-modal mk-button[closes]') as HTMLElement).click())
+      expect(await display()).toBe('none')
+      expect(errors).toEqual([])
+      await close()
+    })
     it('.mk import goes through the Vite plugin and responds to container width', async () => {
       const wide = await open(1000)
       expect(await cols(wide.page)).toBe(3)

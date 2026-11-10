@@ -70,17 +70,12 @@ describe('print', () => {
 describe('recipes', () => {
   const tags = (src: string) => print(compile(src))
   it('card expands to a titled box', () => {
-    expect(tags('card "Plan"\n  text "x"')).toBe('box p=md g=sm\n  text lg bold "Plan"\n  text "x"')
+    expect(tags('card "Plan"\n  text "x"')).toBe('box p=md g=sm raised\n  text lg bold "Plan"\n  text "x"')
   })
   it('navbar expands to brand, spacer, children and a divider', () => {
     expect(tags('navbar "Acme"\n  icon user')).toBe(
       'stack\n  row align=center g=md p=md\n    text lg bold "Acme"\n    spacer\n    icon user\n  divider',
     )
-  })
-  it('tabs bolds the active tab', () => {
-    const out = tags('tabs "A|B|C" active=2')
-    expect(out).toContain('text muted "A"')
-    expect(out).toContain('text bold "B"')
   })
   it('table sizes grid columns from the header and wraps rows', () => {
     const out = tags('table "Name|Email"\n  tr "Ana|a@x.io"')
@@ -95,6 +90,6 @@ describe('recipes', () => {
     const seen: string[] = []
     const walk = (xs: typeof n) => xs.forEach((x) => (seen.push(x.tag), walk(x.children)))
     walk(n)
-    expect(seen.filter((t) => ['card', 'table', 'tr', 'tabs', 'navbar', 'list'].includes(t))).toEqual([])
+    expect(seen.filter((t) => ['card', 'table', 'tr', 'navbar', 'list'].includes(t))).toEqual([])
   })
 })

@@ -1,4 +1,4 @@
-import { INTENT, type RNode } from '../registry'
+import { INTENT, INTERACT, type RNode } from '../registry'
 import { attrDef, specs } from '../specs'
 
 export type MkNode = RNode
@@ -55,14 +55,14 @@ export function parse(src: string): MkNode[] {
     const node: MkNode = { tag: spec.tag, attrs: {}, children: [], line: no }
     const setAttr = (key: string, val: string) => {
       const def = attrDef(spec, key)
-      if (!def) return err(`<${spec.tag}> has no attribute "${key}". Valid: ${list([...Object.keys(spec.attrs), ...Object.keys(INTENT)])}`)
+      if (!def) return err(`<${spec.tag}> has no attribute "${key}". Valid: ${list([...Object.keys(spec.attrs), ...Object.keys(INTENT), ...Object.keys(INTERACT)])}`)
       if (def.flag !== undefined) {
         if (val === 'false') return
         node.attrs[key] = ''
         return
       }
       if (def.rules && !Object.hasOwn(def.rules, val)) return err(`<${spec.tag}> ${key}="${val}" invalid. Valid: ${list(Object.keys(def.rules))}`)
-      node.attrs[key] = val
+      node.attrs[key] = Object.hasOwn(INTERACT, key) ? val.replace(/^#/, '') : val
     }
 
     for (const tok of rest) {
@@ -76,6 +76,14 @@ export function parse(src: string): MkNode[] {
       } else {
         // bare word: flag by name, closed-set attr marked bare, else first free bare attr
         const w = tok.val
+        if (w === 'closes') {
+          node.attrs.closes = ''
+          continue
+        }
+        if (w === 'opens' || w === 'toggles') {
+          err(`${w} needs a target, e.g. ${w}=#name`)
+          continue
+        }
         const flag = Object.hasOwn(spec.attrs, w) ? spec.attrs[w] : undefined
         if (flag && flag.flag !== undefined) node.attrs[w] = ''
         else {
@@ -93,11 +101,48 @@ export function parse(src: string): MkNode[] {
 
     while (stack.length && stack[stack.length - 1]!.depth >= depth) stack.pop()
     if (depth > stack.length) return err('indent jumps more than one level')
-    ;(stack.length ? stack[stack.length - 1]!.node.children : roots).push(node)
+    const parent = stack.length ? stack[stack.length - 1]!.node : undefined
+    if (spec.within && parent?.tag !== spec.within) err(`<${spec.tag}> must be directly inside <${spec.within}>`)
+    ;(parent ? parent.children : roots).push(node)
     stack.push({ node, depth })
   })
+  checkRefs(roots, errors)
   if (errors.length) throw new MkError(errors)
   return roots
+}
+
+/** Names must be unique; opens/toggles/closes must point at an element that can open and close. */
+function checkRefs(roots: MkNode[], errors: string[]) {
+  const named = new Map<string, MkNode>()
+  const all: { node: MkNode; inOverlay: boolean }[] = []
+  const walk = (nodes: MkNode[], inOverlay: boolean) => {
+    for (const n of nodes) {
+      all.push({ node: n, inOverlay })
+      const nm = n.attrs.name
+      if (nm) {
+        const first = named.get(nm)
+        if (first) errors.push(`line ${n.line}: duplicate name #${nm} (first used on line ${first.line})`)
+        else named.set(nm, n)
+      }
+      walk(n.children, inOverlay || !!specs[n.tag]?.stateful)
+    }
+  }
+  walk(roots, false)
+  const statefulTags = Object.values(specs).filter((s) => s.stateful).map((s) => s.tag)
+  for (const { node, inOverlay } of all) {
+    for (const key of ['opens', 'toggles', 'closes'] as const) {
+      const ref = node.attrs[key]
+      if (ref === undefined) continue
+      if (ref === '') {
+        if (key !== 'closes') errors.push(`line ${node.line}: ${key} needs a target, e.g. ${key}=#name`)
+        else if (!inOverlay) errors.push(`line ${node.line}: closes needs an enclosing overlay, or a target: closes=#name`)
+        continue
+      }
+      const target = named.get(ref)
+      if (!target) errors.push(`line ${node.line}: ${key}=#${ref} has no target. Names: ${[...named.keys()].join(' ') || '(none; add #name to the element)'}`)
+      else if (!specs[target.tag]?.stateful) errors.push(`line ${node.line}: ${key}=#${ref} targets <${target.tag}>. Only ${statefulTags.join(' ')} can open or close`)
+    }
+  }
 }
 
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;')

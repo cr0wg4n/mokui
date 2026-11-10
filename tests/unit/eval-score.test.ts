@@ -25,12 +25,21 @@ describe('eval scoring (offline)', () => {
     expect(extractDsl('Here:\n```\nrow\n  icon x\n```\nDone')).toBe('row\n  icon x')
     expect(extractDsl('row')).toBe('row')
   })
+  it('scores interaction prompts: valid references and required overlays', () => {
+    const e = prompts.find((p) => p.id === 'delete-confirm')!.expect
+    const ok = 'stack\n  button danger opens=#c "Delete project"\n  modal #c "Delete project?"\n    text "This cannot be undone."\n    button closes "Cancel"\n    button danger closes "Delete"'
+    expect(score(ok, e).ok).toBe(true)
+    const broken = ok.replace('opens=#c', 'opens=#zzz')
+    const r = score(broken, e)
+    expect(r.parses).toBe(false)
+    expect(r.errors[0]).toContain('opens=#zzz has no target')
+  })
   it('counts recipe output as primitives when the recipe is not written', () => {
     const t = score('table "A|B"\n  tr "1|2"', { tags: { table: 1, grid: 2 } })
     expect(t.ok).toBe(true)
   })
   it('every prompt has expectations and is satisfiable by some valid mock shape', () => {
-    expect(prompts).toHaveLength(12)
+    expect(prompts).toHaveLength(15)
     for (const p of prompts) expect(Object.keys(p.expect).length, p.id).toBeGreaterThan(0)
   })
 })
