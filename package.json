@@ -1,0 +1,52 @@
+{
+  "name": "mokui",
+  "version": "0.0.0",
+  "description": "Framework-agnostic, token-cheap UI mocking for AI agents and humans.",
+  "type": "module",
+  "license": "MIT",
+  "sideEffects": [
+    "./dist/index.js",
+    "./dist/elements/*.js",
+    "./src/index.ts",
+    "./src/elements/*.ts"
+  ],
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./vite": {
+      "types": "./dist/vite-plugin.d.ts",
+      "import": "./dist/vite-plugin.js"
+    }
+  },
+  "scripts": {
+    "dev": "vite playground -c vite.config.ts",
+    "build": "vite build && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "bench": "nub bench/run.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@vitest/browser-playwright": "^5.1.0",
+    "gpt-tokenizer": "^4.1.0",
+    "happy-dom": "^21.0.4",
+    "playwright": "^1.65.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.6",
+    "vitest": "^5.1.0"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "nub",
+      "version": "^0.10.0",
+      "onFail": "ignore"
+    }
+  }
+}
