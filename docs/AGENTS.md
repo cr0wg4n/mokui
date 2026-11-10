@@ -6,7 +6,15 @@ Mokui exists so an agent and a human can share a concrete picture of a UI next t
 ```
 nub exec mokui cheatsheet        # or: import { cheatsheet } from 'mokui/core'
 ```
-About 1,300 tokens, generated from the registry, so it always matches the code. Put it in the system prompt or context once per session.
+About 1,500 tokens by default, generated from the registry, so it always matches the code. Put it in the system prompt or context once per session.
+
+### Packs: load only what the screen needs
+The default sheet covers `core` and `overlay` (about 1,500 tokens) and ends with one line that lists the other tags by pack. The parser accepts every tag regardless, so an agent can use `chart` or `alert` straight from that index line, but its attributes are only documented when the pack is loaded:
+```
+nub exec mokui cheatsheet data feedback     # add the packs the requirements mention
+nub exec mokui cheatsheet all               # everything, about 2,200 tokens
+```
+Rule of thumb: dashboards need `data` and `feedback`, sign-up flows need `forms` and `nav` (`steps`), marketing pages need `nav` (`hero`, `footer`), mobile screens need `nav` (`tabbar`).
 
 ## 2. Write the mock beside the requirements
 ```

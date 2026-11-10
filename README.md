@@ -19,7 +19,7 @@ stack g=lg p=lg
 - **Cheap:** about 70% fewer tokens than the equivalent Tailwind HTML in our fixtures ([bench](./bench/README.md)).
 - **Modern by default:** soft neutrals, rounded corners, subtle elevation; `theme=dark` and `theme=wire` for other looks.
 - **Interactive drafts:** `button opens=#invite`, modals, drawers, sidebars, dropdowns, tabs. Declared, not programmed, and validated.
-- **Closed vocabulary:** unknown tags, attributes and values are errors with line numbers.
+- **Closed vocabulary, wide coverage:** 67 tags (layout, forms, overlays, charts, calendars, alerts, navigation...) in packs that cost tokens only when loaded. Unknown tags, attributes and values are errors with line numbers.
 - **For agents:** generated cheat sheet, structural outline with notes, PNG render. See [docs/AGENTS.md](./docs/AGENTS.md).
 - **One dependency, zero runtime deps.**
 
@@ -28,6 +28,7 @@ stack g=lg p=lg
 - [TECH_DECISIONS.md](./TECH_DECISIONS.md): stack and architecture
 - [ROADMAP.md](./ROADMAP.md): task list and status
 - [docs/USAGE.md](./docs/USAGE.md): install, frameworks, theming, CLI
+- [examples/](./examples/README.md): six screens shared by the playground, a Vue app and a React app
 - [docs/AGENTS.md](./docs/AGENTS.md): how an agent should use Mokui
 - [docs/TESTING.md](./docs/TESTING.md): test layers and coverage
 - [bench/README.md](./bench/README.md), [eval/README.md](./eval/README.md): measurements
@@ -36,7 +37,7 @@ stack g=lg p=lg
 ```
 nub install
 nub exec playwright install chromium
-nub run dev        # live playground
+nub run dev        # live playground: 6 examples (app, analytics, forms, mobile, landing, gallery)
 nub run test       # unit, browser, e2e
 nub run bench      # token benchmark
 ```

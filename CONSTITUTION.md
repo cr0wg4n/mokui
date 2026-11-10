@@ -45,8 +45,13 @@ A mock is a **communication artifact**: it sits next to written requirements and
 - Agents get two views of the same mock: the rendered image and the structural outline. Both derive from one source, so they cannot disagree.
 
 ### 2.7 Composites are recipes, not components
-- Common patterns (card, navbar, tabs, table, list) are important and supported, but as **recipes**: named compositions that expand into the same primitives. They add no new rendering path and no bespoke styling.
-- A recipe is only added when it measurably saves tokens or reduces agent errors in real mocks.
+- Common patterns (card, navbar, table, list, breadcrumb, pagination, steps...) are supported as **recipes**: named compositions that expand into the same primitives. They add no new rendering path and no bespoke styling.
+- A new primitive is added only when a standard UI pattern cannot be composed from existing ones (a chart, a calendar, a progress bar). A recipe is added when a pattern repeats across real screens and a composition costs clearly more tokens.
+
+### 2.9 A complete vocabulary, paid for on demand
+- Mokui aims to cover the common UI surface, so an agent can draft almost any screen without inventing markup. It is a vocabulary of mock elements, not a production component library: placeholder content, fake data, no behavior beyond section 2.8.
+- Every tag costs cheat-sheet tokens. Tags are grouped into **packs** (`core`, `overlay`, `forms`, `feedback`, `data`, `nav`). The default cheat sheet covers `core` and `overlay` and lists the other packs in one line; an agent loads a pack when the requirements need it. The parser always accepts every tag, so a loaded or remembered tag never fails because of packs.
+- Charts, calendars and similar elements are drawn from deterministic fake data (never random, never the current date), so the same source always renders the same picture.
 
 ### 2.8 Interactions are declared, not programmed
 - Real UIs have modals, sidebars, menus and tabs, and a draft that cannot show them misses half the requirements. Mokui supports **declared interactions**: a trigger names what it opens, closes or toggles (`button opens=#confirm`), and some widgets carry built-in selection state (tabs, dropdown, collapse).
@@ -82,7 +87,7 @@ A mock is a **communication artifact**: it sits next to written requirements and
 ## 4. Non-Goals
 
 Mokui will not:
-- Become a full component library or design system. Recipes (section 2.7) expand to primitives; they are not a component library.
+- Become a production component library or design system. The vocabulary may be broad (section 2.9) but stays placeholder-only; recipes (section 2.7) expand to primitives.
 - Ship framework-specific component wrappers as a requirement.
 - Include a state manager, router, data layer, or business logic. Declared interactions (section 2.8) are limited to open, closed and selected.
 - Require a build step beyond a standard Vite setup.

@@ -33,7 +33,7 @@ mount(document.getElementById('app')!, 'stack g=md\n  text xl "Hi"')
 `mount` makes the target a positioned CSS query container, so breakpoint attributes (`cols-md=3`) respond to its width and overlays cover it. Options: `mount(el, src, { theme: 'dark', open: ['invite'] })`.
 
 ### Vue
-Tell Vue the tags are custom elements, then render the HTML or write the tags directly. See [examples/vue](../examples/vue).
+Tell Vue the tags are custom elements, then render the HTML or write the tags directly. See [examples/vue](../examples/vue) (six screens, theme and width controls, and Vue state driving `<mk-*>` tags).
 ```ts
 vue({ template: { compilerOptions: { isCustomElement: (t) => t.startsWith('mk-') } } })
 ```
@@ -43,7 +43,7 @@ vue({ template: { compilerOptions: { isCustomElement: (t) => t.startsWith('mk-')
 ```
 
 ### React 19
-Custom elements work directly. See [examples/react](../examples/react).
+Custom elements work directly. See [examples/react](../examples/react) (the same app in React).
 ```jsx
 <div style={{ containerType: 'inline-size', position: 'relative', minHeight: 520 }} dangerouslySetInnerHTML={{ __html: page }} />
 <mk-row g="md"><mk-icon n="home" /></mk-row>
@@ -51,6 +51,40 @@ Custom elements work directly. See [examples/react](../examples/react).
 
 ### Angular, Svelte, others
 Add `CUSTOM_ELEMENTS_SCHEMA` (Angular) or use the tags as-is (Svelte). Render the HTML string or write `<mk-*>` markup.
+
+## Elements
+Every tag, grouped in packs. The default cheat sheet documents `core` and `overlay`; `mokui cheatsheet <pack>` (or `cheatsheet({ packs })`) documents the others. The parser accepts every tag whatever was loaded. Recipes are marked (r): they expand to primitives.
+
+| Pack | Tags |
+|---|---|
+| **core** | `stack` `row` `grid` `box` `spacer` `divider` `scroll` `frame` `text` `link` `icon` `image` `avatar` `badge` `button` `input` `textarea` `select` `checkbox` `radio` `switch` `slider`, `card` (r) `navbar` (r) `list` (r) `table` (r) `tr` (r) |
+| **overlay** | `modal` `drawer` `sidebar` `dropdown` `menu` `item` `popover` `tooltip` `toast` `collapse` `tabs` `tab` |
+| **forms** | `segmented` `upload` `otp`, `radios` (r) `checkboxes` (r) |
+| **feedback** | `alert` `progress` `spinner` `skeleton` `rating` `chip`, `empty` (r) `stat` (r) |
+| **data** | `chart` `calendar` `avatars` `code` `kbd` `video`, `timeline` (r) |
+| **nav** | `breadcrumb` (r) `pagination` (r) `steps` (r) `tabbar` (r) `toolbar` (r) `command` (r) `hero` (r) `footer` (r) |
+
+A few that are easy to miss:
+```
+input email label="Email" help="We never share it" "you@x.com"      // help / error under any field
+input label="Username" error="Already taken" value=ana             // red border and text
+chart area labels="Mon|Tue|Wed"                                    // line bar area donut pie; values="3,5,2"
+calendar value=12 range="16-20"                                    // November 2026 by default; month="2026-05"
+stat "Revenue" value="$48k" delta="+12%"                           // green for +, red for -
+steps "Account|Plan|Confirm" active=2
+tabbar "home|search|bell:Alerts|user" active=1                      // stays at the bottom of a frame
+button fab icon=plus opens=#compose                                 // floating button, bottom-right
+drawer #compose bottom "New message"                                // bottom sheet (also top, left, right)
+popover                                                             // trigger, then any content
+  button "Filters"
+  stack g=sm p=sm
+    checkbox "Active"
+divider "OR"
+```
+Charts and calendars use fixed fake data and never the current date, so the same source always draws the same picture.
+
+## Pages and phone previews
+`frame mobile` (375px wide, 640px tall) and `frame tablet` are flex columns with a screen-like height. Put overlays, a `fab` and a `tabbar` inside the frame; `tabbar` pins itself to the bottom edge (use the `bottom` flag on a `stack` or `row` to do the same for any bar).
 
 ## Containers: queries and overlays
 Rendering HTML yourself (instead of `mount`) needs a wrapper with `container-type: inline-size; position: relative`:

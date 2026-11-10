@@ -4,7 +4,7 @@ Task list for building Mokui. Check items off as they land (`- [x]`). Any deviat
 
 Status legend: `[x]` done and tested, `[ ]` not done.
 
-**Status: Steps 0-5 and 7-9 are done. Step 6 is done except running the accuracy eval against a real model.** 162 tests pass (unit, browser, e2e).
+**Status: Steps 0-5 and 7-10 are done. Step 6 is done except running the accuracy eval against a real model.** 244 tests pass (unit, browser, e2e).
 
 ## Step 0: Registry as single source of truth
 - [x] Primitive registry: one spec per tag (attributes, allowed values, CSS rules, bare-word mapping)
@@ -95,6 +95,16 @@ Status legend: `[x]` done and tested, `[ ]` not done.
 - [x] Cheat sheet, docs, benchmark fixture and eval prompts updated
 - [x] Tests: unit, real-browser interaction tests, CLI states, framework consumers click through
 
+## Step 10: Complete element set
+- [x] Packs: `core`, `overlay`, `forms`, `feedback`, `data`, `nav`; cheat sheet loads core + overlay by default, `cheatsheet({ packs })` / `mokui cheatsheet <pack>` for the rest
+- [x] Tokens and variants: `success`, `warning`, `info`; badge variants
+- [x] Feedback: `alert`, `progress`, `spinner`, `skeleton`, `rating`, `chip`, `empty` (recipe), `stat` (recipe)
+- [x] Data: `chart` (line, bar, area, donut, pie), `calendar`, `timeline` (recipe), `avatars`, `code`, `kbd`, `video`
+- [x] Forms: `segmented`, `upload`, `otp`, `radios` / `checkboxes` (recipes), `help=` / `error=` on fields, `link`
+- [x] Nav and pages: `breadcrumb`, `pagination`, `steps`, `tabbar`, `toolbar`, `command`, `hero`, `footer` (recipes)
+- [x] Overlays and misc: `popover`, `drawer` top/bottom, `fab`, `divider "label"`, `icon muted`, 40 more icons
+- [x] Tests (unit and real browser), docs, cheat sheet cost measured per pack
+
 ## Notes
 Deviations from the plan and findings, recorded as work happened.
 
@@ -125,6 +135,19 @@ Deviations from the plan and findings, recorded as work happened.
 - **Default accent is near-black on purpose** so drafts do not look like a brand design. Colors are one variable away.
 - **Accessibility is minimal:** roles on controls, but overlays do not trap or restore focus and tabs, dropdowns have no arrow-key support.
 - **Still untested by a model:** whether agents write `opens=#x` flows correctly. Three interaction prompts were added to the eval for when it runs.
+
+**Step 10 (complete element set)**
+- **About 30 tags added** in six packs: 17 primitives (`alert` `progress` `spinner` `skeleton` `rating` `chip` `chart` `calendar` `avatars` `code` `kbd` `video` `segmented` `upload` `otp` `popover`, plus `link`), 13 recipes (`breadcrumb` `pagination` `steps` `tabbar` `toolbar` `command` `hero` `footer` `stat` `empty` `timeline` `radios` `checkboxes`), `help=` / `error=` on fields, bottom and top drawers, `fab`, a labeled `divider`, 40 more icons, status tokens and badge variants.
+- **Packs were the answer to token cost.** Adding everything to one sheet would have made the cheat sheet about 2,200 tokens; the default stays at 1,498 and the rest loads on demand (constitution 2.9).
+- **Bugs found by tests and by looking at renders:** a `popover` click edit that silently did not apply (caught because its test failed); `chart` drawing one zero point when `values` was absent; mobile frames were only as tall as their content, so a tab bar and fab floated mid-screen. Fixed by giving device frames a screen-like height, making them flex columns, and adding a `bottom` flag that `tabbar` uses.
+- **Recipes that expand to a stateful primitive** (`command` becomes a `modal`) are marked `stateful`, so `opens=#cmd` validates.
+- **`icon` size is now a bare word** (`icon bell xl`).
+- **The eval's prompt set grew to 18** (three for the new elements) and loads every pack by default; `EVAL_PACKS=default` tests the cheaper sheet.
+- **Still a vocabulary, not production components:** placeholder data, no behavior beyond open / close / select. Charts have no axes values or tooltips; the calendar has no navigation.
+
+**Examples**
+- The Vue and React apps now mirror the playground: the same six screens (shared `examples/screens/*.mk`, imported with `?raw` by the playground and through the Vite plugin by the apps), a screen picker, theme and width controls, and a section where framework state drives plain `<mk-*>` tags. 244 tests, 27 of them end-to-end.
+- Finding: in React 19 a boolean attribute on a custom element must be written `x=""` (a `true` prop is not reflected); Vue and bound `undefined` work as expected. Documented in `examples/README.md`.
 
 **Not done / needs a decision**
 - **Accuracy eval against a real model.** The harness and offline scoring exist; no API key is available here and a run costs money. Until it runs, the DSL being the primary format is provisional.

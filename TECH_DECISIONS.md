@@ -104,8 +104,17 @@ Unknown tags, attributes and values are errors, all reported at once with line n
 ### Recipes (`src/recipes.ts`)
 `card`, `navbar`, `list`, `table`, `tr` are DSL-level macros that expand to primitives before rendering. There are no recipe elements, no extra rendering path, and the DOM stays flat and readable. See constitution section 2.7.
 
+### Packs (a wide vocabulary that stays cheap)
+- Every tag belongs to one pack in `src/specs.ts`: `core`, `overlay`, `forms`, `feedback`, `data`, `nav`. `cheatsheet()` documents `core` and `overlay` and ends with a single index line of the other packs; `cheatsheet({ packs })` and `mokui cheatsheet <pack|all>` load more. The parser never looks at packs, so a tag used from the index line is always valid. A unit test makes sure every tag is in exactly one pack.
+- Measured: 1,498 tokens for the default sheet, 2,177 for everything. The vocabulary roughly doubled while the default cost grew about 13%.
+- New primitives live in `src/extras.ts` (feedback, data, forms) and `src/interactive.ts`; recipes in `src/recipes.ts`. Renderers (SVG for charts, the calendar grid, stars) are in `src/elements/render.ts`.
+
+### Deterministic fake data
+Charts take optional `values`, otherwise draw fixed sample data per kind; calendars draw a fixed month (2026-11) unless `month=` is given. Nothing reads the clock or `Math.random`, so a source always renders the same picture and PNG renders can be compared. (A first version of `chart` treated a missing `values` as `[0]`; an empty-string filter fixed that, found by a test.)
+
 ### Look: tokens and themes
 - Every color, radius and shadow is a design token read through a CSS variable with the modern value as its fallback (`var(--mk-fg,#18181b)`). A `theme` attribute (`modern`, `dark`, `wire`) on any element redefines the variables for its subtree; because custom properties inherit through shadow DOM, a dark panel can sit inside a light page. `mount(..., { theme })` does the same for a whole mock.
+- Status colors (`success`, `warning`, `info`, `danger`) are tokens too: `alert`, badge variants, `rating` and `stat` deltas use them, `dark` lightens them, `wire` flattens them to the foreground color.
 - The default is modern and restrained: zinc neutrals, 12px / 8px radii, soft shadows, one accent that defaults to near-black so a draft is not mistaken for a brand design (constitution 3.5). `wire` keeps the old plain look for low-fidelity conversations.
 - Theme rules live in the shared base sheet, so adding a theme is one entry in `src/scale.ts`.
 
